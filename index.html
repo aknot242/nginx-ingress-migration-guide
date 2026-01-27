@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGINX Ingress Migration Guide</title>
+    <style>
+        :root {
+            --primary-color: #009639;
+            --primary-dark: #006b2b;
+            --secondary-color: #0066b3;
+            --plus-color: #f57c00;
+            --oss-color: #009639;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+            --code-bg: #f4f4f4;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text-color); background-color: var(--bg-color); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        header { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding: 40px 0; margin-bottom: 30px; }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+        nav { background: var(--card-bg); padding: 15px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        nav a { color: var(--primary-color); text-decoration: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; transition: all 0.3s; }
+        nav a:hover { background: var(--primary-color); color: white; }
+        main { padding: 20px 0 60px; }
+        section { background: var(--card-bg); border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h2 { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 25px; font-size: 1.8rem; }
+        h3 { color: var(--secondary-color); margin: 30px 0 15px; font-size: 1.3rem; }
+        .table-wrapper { overflow-x: auto; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--primary-color); color: white; font-weight: 600; }
+        tr.expandable { cursor: pointer; transition: background-color 0.2s; }
+        tr.expandable:hover { background-color: #e8f5e9; }
+        tr.expandable td:first-child::before { content: '▶'; display: inline-block; margin-right: 8px; font-size: 0.7rem; transition: transform 0.2s; color: var(--primary-color); }
+        tr.expandable.expanded td:first-child::before { transform: rotate(90deg); }
+        tr.example-row { display: none; }
+        tr.example-row.visible { display: table-row; }
+        tr.example-row td { padding: 0; background: #fafafa; }
+        .example-content { padding: 20px; border-left: 4px solid var(--primary-color); margin: 10px; background: white; border-radius: 0 8px 8px 0; }
+        tr:not(.expandable):not(.example-row):hover { background-color: #f5f5f5; }
+        .annotation-list { display: flex; flex-direction: column; gap: 4px; }
+        code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.85em; color: #d63384; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 15px 0; }
+        pre code { background: none; color: inherit; padding: 0; }
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .comparison { grid-template-columns: 1fr; } }
+        .comparison-block { border-radius: 8px; overflow: hidden; }
+        .comparison-block h5 { padding: 10px 15px; margin: 0; font-size: 0.9rem; }
+        .comparison-block.old h5 { background: #ffebee; color: #c62828; }
+        .comparison-block.new h5 { background: #e8f5e9; color: #2e7d32; }
+        .comparison-block pre { margin: 0; border-radius: 0; }
+        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-weight: 500; margin-left: 5px; white-space: nowrap; }
+        .badge-virtualserver { background: #e3f2fd; color: #1565c0; }
+        .badge-policy { background: #f3e5f5; color: #7b1fa2; }
+        .badge-transportserver { background: #fff3e0; color: #ef6c00; }
+        .badge-plus { background: #fff3e0; color: #e65100; }
+        .badge-oss { background: #e8f5e9; color: #2e7d32; }
+        .install-box { background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 15px 20px; border-radius: 8px; margin: 20px 0 15px; }
+        .install-box h6 { margin: 0 0 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .install-box h6::before { content: '⚙️'; }
+        .install-box pre { background: rgba(0,0,0,0.3); margin: 0; padding: 12px 15px; font-size: 0.8rem; }
+        .install-box code { color: #90caf9; background: none; }
+        .info-box { padding: 12px 16px; border-radius: 6px; margin: 15px 0; font-size: 0.9rem; }
+        .info-box.note { background: #e3f2fd; border-left: 4px solid #2196f3; }
+        .info-box.tip { background: #e8f5e9; border-left: 4px solid #4caf50; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: #e0e0e0; color: var(--text-color); }
+        .btn-secondary:hover { background: #d0d0d0; }
+        .edition-header { display: flex; align-items: center; gap: 15px; margin: 40px 0 20px; padding: 15px 20px; border-radius: 8px; }
+        .edition-header.oss { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-left: 5px solid var(--oss-color); }
+        .edition-header.plus { background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-left: 5px solid var(--plus-color); }
+        .edition-header h3 { margin: 0; font-size: 1.4rem; }
+        .edition-header.oss h3 { color: var(--oss-color); }
+        .edition-header.plus h3 { color: var(--plus-color); }
+        .edition-header p { margin: 5px 0 0; font-size: 0.9rem; color: #666; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin: 20px 0; }
+        .feature-card { background: #f8f9fa; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); }
+        .feature-card h4 { color: var(--primary-color); margin: 0 0 15px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .feature-card .description { font-size: 0.95rem; color: #555; margin-bottom: 15px; line-height: 1.5; }
+        .feature-card ul { margin: 0; padding-left: 20px; }
+        .feature-card li { margin: 8px 0; font-size: 0.9rem; }
+        .feature-card li strong { color: var(--secondary-color); }
+        .legend { display: flex; flex-wrap: wrap; gap: 15px; margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; }
+        .crd-indicator { color: var(--primary-color); font-weight: 500; }
+        .checklist { list-style: none; padding: 0; }
+        .checklist li { padding: 10px 0 10px 35px; position: relative; border-bottom: 1px solid var(--border-color); }
+        .checklist li::before { content: '☐'; position: absolute; left: 0; font-size: 1.2rem; color: var(--primary-color); }
+        footer { background: var(--text-color); color: white; padding: 30px 0; text-align: center; }
+        footer a { color: #90EE90; }
+        .copy-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; float: right; }
+        .copy-btn:hover { background: rgba(255,255,255,0.3); }
+        .copy-btn.copied { background: #4caf50; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>NGINX Ingress Migration Guide</h1>
+            <p>Migrate from Kubernetes Community NGINX Ingress to Official NGINX Ingress Controller</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#differences">Key Differences</a></li>
+                <li><a href="#oss-mappings">OSS Mappings</a></li>
+                <li><a href="#plus-mappings">Plus Mappings</a></li>
+                <li><a href="#features">CRD Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#checklist">Checklist</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Key Differences -->
+        <section id="differences">
+            <h2>Key Differences</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Aspect</th><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr><td>Repository</td><td><code>kubernetes/ingress-nginx</code></td><td><code>nginx/kubernetes-ingress</code></td></tr>
+                        <tr><td>Annotation Prefix</td><td><code>nginx.ingress.kubernetes.io/</code></td><td><code>nginx.org/</code> or <code>nginx.com/</code></td></tr>
+                        <tr><td>CRD Support</td><td>Limited</td><td>VirtualServer, VirtualServerRoute, Policy, TransportServer</td></tr>
+                        <tr><td>NGINX Plus Support</td><td>No</td><td>Yes (with <code>nginx.com/</code> annotations)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- OSS Mappings -->
+        <section id="oss-mappings">
+            <h2>NGINX Open Source Mappings</h2>
+            <p>These features are available in both NGINX Open Source and NGINX Plus editions.</p>
+
+            <div class="info-box tip" style="margin: 20px 0;">
+                <strong>How to Read the Mappings</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li><strong>Simple rows:</strong> Direct 1-to-1 annotation mappings. Just change the annotation prefix from <code>nginx.ingress.kubernetes.io/</code> to <code>nginx.org/</code> (or the value shown).</li>
+                    <li><strong>Expandable rows <span style="color: var(--primary-color);">▶</span>:</strong> These annotations map to a CRD (VirtualServer, Policy, or TransportServer). Click to expand and see the full CRD example with installation instructions.</li>
+                    <li><strong>Grouped annotations:</strong> Related annotations that work together are grouped in a single expandable row, showing how they map to a unified CRD configuration.</li>
+                </ul>
+            </div>
+
+            <div class="controls">
+                <input type="text" id="searchInput" placeholder="Search annotations..." onkeyup="filterTable()">
+                <button class="btn btn-primary" onclick="expandAllExamples()">Expand All</button>
+                <button class="btn btn-secondary" onclick="collapseAllExamples()">Collapse All</button>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><span class="legend-icon">▶</span> Click to expand</div>
+                <div class="legend-item"><span class="badge badge-virtualserver">VirtualServer</span></div>
+                <div class="legend-item"><span class="badge badge-policy">Policy</span></div>
+                <div class="legend-item"><span class="badge badge-transportserver">TransportServer</span></div>
+            </div>
+
+            <!-- Access Control -->
+            <h3>Access Control</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>denylist-source-range</code><code>whitelist-source-range</code></div></td>
+                            <td><span class="badge badge-policy">Policy</span> <code>accessControl</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12"
+  nginx.ingress.kubernetes.io/denylist-source-range: "192.168.1.100"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: access-control
+spec:
+  accessControl:
+    allow:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+    deny:
+      - 192.168.1.100</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Authentication - Basic -->
+            <h3>Authentication (Basic)</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>auth-realm</code><code>auth-secret</code><code>auth-secret-type</code><code>auth-type: "basic"</code></div></td>
+                            <td><code>nginx.org/basic-auth-*</code> or <span class="badge badge-policy">Policy</span> <code>basicAuth</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/auth-type: "basic"
+  nginx.ingress.kubernetes.io/auth-secret: "basic-auth"
+  nginx.ingress.kubernetes.io/auth-realm: "Protected Area"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-auth
+type: nginx.org/htpasswd
+data:
+  htpasswd: dXNlcjokYXByMS4uLg==
+---
+apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: basic-auth-policy
+spec:
+  basicAuth:
+    secret: basic-auth
+    realm: "Protected Area"</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Buffering -->
+            <h3>Buffering</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>client-body-buffer-size</code></td><td><code>nginx.org/client-body-buffer-size</code></td></tr>
+                        <tr><td><code>proxy-buffer-size</code></td><td><code>nginx.org/proxy-buffer-size</code></td></tr>
+                        <tr><td><code>proxy-buffering</code></td><td><code>nginx.org/proxy-buffering</code></td></tr>
+                        <tr><td><code>proxy-buffers-number</code></td><td><code>nginx.org/proxy-buffers</code></td></tr>
+                        <tr><td><code>proxy-body-size</code></td><td><code>nginx.org/client-max-body-size</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Canary / Traffic Splitting -->
+            <h3>Canary / Traffic Splitting</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>canary</code><code>canary-by-cookie</code><code>canary-by-header</code><code>canary-by-header-pattern</code><code>canary-by-header-value</code><code>canary-weight</code><code>canary-weight-total</code></div></td>
+                            <td><span class="badge badge-virtualserver">VirtualServer</span> <code>splits[]</code> / <code>matches[]</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code># Canary Ingress
+annotations:
+  nginx.ingress.kubernetes.io/canary: "true"
+  nginx.ingress.kubernetes.io/canary-weight: "20"
+  nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+  nginx.ingress.kubernetes.io/canary-by-cookie: "canary"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  upstreams:
+    - name: main
+      service: main-svc
+      port: 80
+    - name: canary
+      service: canary-svc
+      port: 80
+  routes:
+    - path: /
+      matches:
+        - conditions:
+            - header: X-Canary
+              value: "true"
+          action:
+            pass: canary
+        - conditions:
+            - cookie: canary
+              value: "true"
+          action:
+            pass: canary
+      splits:
+        - weight: 80
+          action: { pass: main }
+        - weight: 20
+          action: { pass: canary }</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Error Handling -->
+            <h3>Error Handling</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>custom-http-errors</code><code>default-backend</code></div></td>
+                            <td><span class="badge badge-virtualserver">VirtualServer</span> <code>errorPages[]</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/custom-http-errors: "404,500,502"
+  nginx.ingress.kubernetes.io/default-backend: "error-svc"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  routes:
+    - path: /
+      action:
+        pass: backend
+      errorPages:
+        - codes: [404]
+          redirect:
+            url: /404.html
+            code: 302
+        - codes: [500, 502]
+          return:
+            code: 503
+            body: "Service Unavailable"</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Load Balancing -->
+            <h3>Load Balancing</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>load-balance</code></td><td><code>nginx.org/lb-method</code></td></tr>
+                        <tr><td><code>service-upstream</code></td><td><code>nginx.org/use-cluster-ip</code></td></tr>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>upstream-hash-by</code><code>upstream-hash-by-subset</code><code>upstream-hash-by-subset-size</code></div></td>
+                            <td><span class="badge badge-virtualserver">VirtualServer</span> <code>upstreams[].lb-method</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/upstream-hash-by: "$request_uri"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  upstreams:
+    - name: backend
+      service: my-service
+      port: 80
+      lb-method: "hash $request_uri consistent"</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- mTLS (Client) -->
+            <h3>mTLS (Client Certificate Verification)</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>auth-tls-error-page</code><code>auth-tls-pass-certificate-to-upstream</code><code>auth-tls-secret</code><code>auth-tls-verify-client</code><code>auth-tls-verify-depth</code></div></td>
+                            <td><span class="badge badge-policy">Policy</span> <code>ingressMTLS</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/auth-tls-secret: "ns/ca-secret"
+  nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+  nginx.ingress.kubernetes.io/auth-tls-verify-depth: "2"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: ingress-mtls
+spec:
+  ingressMTLS:
+    clientCertSecret: ca-secret
+    verifyClient: "on"
+    verifyDepth: 2</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- mTLS (Backend) -->
+            <h3>mTLS (Backend/Egress)</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>proxy-ssl-ciphers</code><code>proxy-ssl-protocols</code><code>proxy-ssl-secret</code><code>proxy-ssl-server-name</code><code>proxy-ssl-verify</code><code>proxy-ssl-verify-depth</code></div></td>
+                            <td><span class="badge badge-policy">Policy</span> <code>egressMTLS</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/proxy-ssl-secret: "ns/client-cert"
+  nginx.ingress.kubernetes.io/proxy-ssl-verify: "on"
+  nginx.ingress.kubernetes.io/proxy-ssl-verify-depth: "2"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: egress-mtls
+spec:
+  egressMTLS:
+    tlsSecret: client-cert
+    trustedCertSecret: ca-cert
+    verifyServer: true
+    verifyDepth: 2</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Proxy Settings -->
+            <h3>Proxy Settings</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>proxy-next-upstream</code><code>proxy-next-upstream-timeout</code><code>proxy-next-upstream-tries</code></div></td>
+                            <td><span class="badge badge-virtualserver">VirtualServer</span> <code>upstreams[].next-upstream*</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout"
+  nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "30"
+  nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "3"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  upstreams:
+    - name: backend
+      service: my-service
+      port: 80
+      next-upstream: "error timeout"
+      next-upstream-timeout: 30s
+      next-upstream-tries: 3</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rate Limiting -->
+            <h3>Rate Limiting</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>limit-burst-multiplier</code><code>limit-connections</code><code>limit-rate</code><code>limit-rate-after</code><code>limit-rpm</code><code>limit-rps</code><code>limit-whitelist</code></div></td>
+                            <td><code>nginx.org/limit-req-*</code> or <span class="badge badge-policy">Policy</span> <code>rateLimit</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/limit-rps: "10"
+  nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: rate-limit
+spec:
+  rateLimit:
+    rate: 10r/s
+    burst: 50
+    key: ${binary_remote_addr}
+    zoneSize: 10M
+    rejectCode: 429</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Redirects -->
+            <h3>Redirects</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>from-to-www-redirect</code><code>permanent-redirect</code><code>permanent-redirect-code</code><code>temporal-redirect</code></div></td>
+                            <td><span class="badge badge-virtualserver">VirtualServer</span> <code>action.redirect</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/permanent-redirect: "https://new.example.com"
+  nginx.ingress.kubernetes.io/permanent-redirect-code: "308"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  host: old.example.com
+  routes:
+    - path: /
+      action:
+        redirect:
+          url: https://new.example.com${request_uri}
+          code: 308</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rewrites -->
+            <h3>Rewrites</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>app-root</code><code>rewrite-target</code><code>use-regex</code></div></td>
+                            <td><code>nginx.org/rewrites</code> or <span class="badge badge-virtualserver">VirtualServer</span> <code>rewritePath</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/rewrite-target: /$2
+  nginx.ingress.kubernetes.io/use-regex: "true"
+# path: /api(/|$)(.*)</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  routes:
+    - path: ~ ^/api(/|$)(.*)
+      action:
+        proxy:
+          upstream: api
+          rewritePath: /$2</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SSL/TLS -->
+            <h3>SSL/TLS</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>backend-protocol</code></td><td><code>nginx.org/ssl-services</code> or <code>nginx.org/grpc-services</code></td></tr>
+                        <tr><td><code>force-ssl-redirect</code></td><td><code>nginx.org/redirect-to-https</code></td></tr>
+                        <tr><td><code>ssl-ciphers</code></td><td><code>nginx.org/ssl-ciphers</code></td></tr>
+                        <tr><td><code>ssl-prefer-server-ciphers</code></td><td><code>nginx.org/ssl-prefer-server-ciphers</code></td></tr>
+                        <tr><td><code>ssl-redirect</code></td><td><code>nginx.org/redirect-to-https</code></td></tr>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><code>ssl-passthrough</code></td>
+                            <td><span class="badge badge-transportserver">TransportServer</span> <code>TLS_PASSTHROUGH</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install TransportServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_transportservers.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_globalconfigurations.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/ssl-passthrough: "true"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code># GlobalConfiguration (once per cluster)
+apiVersion: k8s.nginx.org/v1
+kind: GlobalConfiguration
+spec:
+  listeners:
+    - name: tls-passthrough
+      port: 443
+      protocol: TLS_PASSTHROUGH
+---
+apiVersion: k8s.nginx.org/v1
+kind: TransportServer
+spec:
+  listener:
+    name: tls-passthrough
+    protocol: TLS_PASSTHROUGH
+  host: secure.example.com
+  upstreams:
+    - name: backend
+      service: secure-svc
+      port: 443
+  action:
+    pass: backend</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TCP/UDP -->
+            <h3>TCP/UDP Load Balancing</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>stream-snippet</code><code>tcp-services ConfigMap</code><code>udp-services ConfigMap</code></div></td>
+                            <td><span class="badge badge-transportserver">TransportServer</span></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install TransportServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_transportservers.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_globalconfigurations.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code># ConfigMap for TCP services
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+data:
+  3306: "default/mysql:3306"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress</h5><pre><code># GlobalConfiguration
+apiVersion: k8s.nginx.org/v1
+kind: GlobalConfiguration
+spec:
+  listeners:
+    - name: mysql-tcp
+      port: 3306
+      protocol: TCP
+---
+apiVersion: k8s.nginx.org/v1
+kind: TransportServer
+spec:
+  listener:
+    name: mysql-tcp
+    protocol: TCP
+  upstreams:
+    - name: mysql
+      service: mysql
+      port: 3306
+  action:
+    pass: mysql</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Timeouts -->
+            <h3>Timeouts</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>proxy-connect-timeout</code></td><td><code>nginx.org/proxy-connect-timeout</code></td></tr>
+                        <tr><td><code>proxy-read-timeout</code></td><td><code>nginx.org/proxy-read-timeout</code></td></tr>
+                        <tr><td><code>proxy-send-timeout</code></td><td><code>nginx.org/proxy-send-timeout</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Plus Mappings -->
+        <section id="plus-mappings">
+            <h2>NGINX Plus Mappings</h2>
+            <p>These features require an NGINX Plus subscription and provide enterprise-grade capabilities. Most Plus features use CRD-based configuration—click the expandable rows <span style="color: var(--primary-color);">▶</span> to see full examples.</p>
+
+            <div class="legend">
+                <div class="legend-item"><span class="badge badge-plus">Plus Required</span></div>
+                <div class="legend-item"><span class="badge badge-virtualserver">VirtualServer</span></div>
+                <div class="legend-item"><span class="badge badge-policy">Policy</span></div>
+            </div>
+
+            <!-- API Key Authentication -->
+            <h3>API Key Authentication</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><code>No direct equivalent</code></td>
+                            <td><span class="badge badge-policy">Policy</span> <span class="badge badge-plus">Plus</span> <code>apiKey</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code># No direct equivalent
+# Requires custom Lua or external service</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress (Plus)</h5><pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: api-keys
+type: nginx.org/apikey
+data:
+  client1: YXBpa2V5MTIzNDU=
+---
+apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: api-key-auth
+spec:
+  apiKey:
+    suppliedIn:
+      header: [X-API-Key]
+      query: [api_key]
+    clientSecret: api-keys</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- JWT Authentication -->
+            <h3>JWT Authentication</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><code>No direct equivalent</code></td>
+                            <td><span class="badge badge-policy">Policy</span> <span class="badge badge-plus">Plus</span> <code>jwt</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code># No direct equivalent
+# Requires external auth service</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress (Plus)</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: jwt-auth
+spec:
+  jwt:
+    realm: "API"
+    jwksURI: "https://idp.example.com/.well-known/jwks.json"
+    token: "$http_authorization"
+    keyCache: 1h</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- OIDC Authentication -->
+            <h3>OIDC Authentication</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>auth-cache-duration</code><code>auth-cache-key</code><code>auth-method</code><code>auth-proxy-set-headers</code><code>auth-request-redirect</code><code>auth-response-headers</code><code>auth-signin</code><code>auth-signin-redirect-param</code><code>auth-url</code></div></td>
+                            <td><span class="badge badge-policy">Policy</span> <span class="badge badge-plus">Plus</span> <code>oidc</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/auth-url: "https://auth.example.com/oauth2/auth"
+  nginx.ingress.kubernetes.io/auth-signin: "https://auth.example.com/oauth2/start"
+  nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-User"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress (Plus)</h5><pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: oidc-secret
+type: nginx.org/oidc
+data:
+  client-secret: c2VjcmV0...
+---
+apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: oidc-auth
+spec:
+  oidc:
+    clientID: "my-client-id"
+    clientSecret: oidc-secret
+    authEndpoint: "https://idp.example.com/authorize"
+    tokenEndpoint: "https://idp.example.com/token"
+    jwksURI: "https://idp.example.com/.well-known/jwks.json"
+    scope: "openid+profile+email"</code></pre></div>
+                            </div>
+                            <div class="info-box note"><strong>Note:</strong> Native OIDC support eliminates the need for oauth2-proxy sidecar.</div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Session Affinity -->
+            <h3>Session Affinity / Sticky Sessions</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>affinity: "cookie"</code><code>session-cookie-change-on-failure</code><code>session-cookie-conditional-samesite-none</code><code>session-cookie-expires</code><code>session-cookie-max-age</code><code>session-cookie-name</code><code>session-cookie-path</code><code>session-cookie-samesite</code><code>session-cookie-secure</code></div></td>
+                            <td><span class="badge badge-virtualserver">VirtualServer</span> <span class="badge badge-plus">Plus</span> <code>sessionCookie</code></td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install VirtualServer CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/affinity: "cookie"
+  nginx.ingress.kubernetes.io/session-cookie-name: "SERVERID"
+  nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+  nginx.ingress.kubernetes.io/session-cookie-path: "/"
+  nginx.ingress.kubernetes.io/session-cookie-secure: "true"
+  nginx.ingress.kubernetes.io/session-cookie-samesite: "Strict"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress (Plus)</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+spec:
+  upstreams:
+    - name: backend
+      service: my-service
+      port: 80
+      sessionCookie:
+        enable: true
+        name: SERVERID
+        expires: 48h
+        path: /
+        secure: true
+        httpOnly: true
+        samesite: strict</code></pre></div>
+                            </div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- WAF -->
+            <h3>WAF (Web Application Firewall)</h3>
+            <div class="table-wrapper">
+                <table class="mapping-table"><thead><tr><th>Kubernetes NGINX Ingress</th><th>Official NGINX Ingress</th></tr></thead>
+                    <tbody>
+                        <tr class="expandable" onclick="toggleRow(this)">
+                            <td><div class="annotation-list"><code>enable-modsecurity</code><code>enable-owasp-core-rules</code><code>modsecurity-snippet</code><code>modsecurity-transaction-id</code></div></td>
+                            <td><span class="badge badge-policy">Policy</span> <span class="badge badge-plus">Plus</span> <code>waf</code> (NGINX App Protect)</td>
+                        </tr>
+                        <tr class="example-row"><td colspan="2"><div class="example-content">
+                            <div class="install-box"><h6>Install Policy CRD <button class="copy-btn" onclick="copyInstall(this, event)">Copy</button></h6>
+                                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml</code></pre>
+                            </div>
+                            <div class="comparison">
+                                <div class="comparison-block old"><h5>Kubernetes NGINX Ingress</h5><pre><code>annotations:
+  nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+  nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"</code></pre></div>
+                                <div class="comparison-block new"><h5>Official NGINX Ingress (Plus)</h5><pre><code>apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: waf-policy
+spec:
+  waf:
+    enable: true
+    apPolicy: "default/waf-policy"
+    securityLogs:
+      - enable: true
+        apLogConf: "default/log-config"
+        logDest: "syslog:server=syslog:514"</code></pre></div>
+                            </div>
+                            <div class="info-box note"><strong>Note:</strong> NGINX App Protect (NAP) provides enterprise WAF capabilities beyond ModSecurity.</div>
+                        </div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- CRD Features Summary -->
+        <section id="features">
+            <h2>CRD Features Summary</h2>
+            <p>The Official NGINX Ingress Controller uses Custom Resource Definitions (CRDs) to extend Kubernetes with NGINX-specific configuration. CRDs provide type-safe, validated configuration that goes beyond what standard Ingress annotations can offer.</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="badge badge-virtualserver" style="margin:0 8px 0 0">VirtualServer</span> VirtualServer</h4>
+                    <p class="description">The primary CRD for configuring HTTP/HTTPS load balancing. It replaces Ingress resources and provides advanced traffic management capabilities with full validation.</p>
+                    <ul>
+                        <li><strong>Traffic Splitting:</strong> Route percentages of traffic to different backends for canary/blue-green deployments</li>
+                        <li><strong>Content-Based Routing:</strong> Route based on headers, cookies, arguments, or variables</li>
+                        <li><strong>Path Rewriting:</strong> Modify request URIs with regex support before forwarding to backends</li>
+                        <li><strong>Error Pages:</strong> Custom responses for specific HTTP error codes</li>
+                        <li><strong>Request/Response Headers:</strong> Add, modify, or remove headers in transit</li>
+                        <li><strong>Health Checks:</strong> Active health monitoring of upstream servers</li>
+                        <li><strong>Session Persistence:</strong> Cookie-based sticky sessions (Plus)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4><span class="badge badge-virtualserver" style="margin:0 8px 0 0">VSRoute</span> VirtualServerRoute</h4>
+                    <p class="description">Enables delegation of route configuration to different namespaces. Allows teams to manage their own routing rules while maintaining centralized control over the domain.</p>
+                    <ul>
+                        <li><strong>Cross-Namespace Routing:</strong> Reference services in different namespaces</li>
+                        <li><strong>Path Delegation:</strong> Delegate path prefixes to other teams/namespaces</li>
+                        <li><strong>Independent Updates:</strong> Teams update routes without modifying the parent VirtualServer</li>
+                        <li><strong>Access Control:</strong> Limit which namespaces can define routes for a host</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4><span class="badge badge-policy" style="margin:0 8px 0 0">Policy</span> Policy</h4>
+                    <p class="description">Reusable security and traffic policies that can be attached to VirtualServers or specific routes. Policies enable consistent security controls across multiple applications.</p>
+                    <ul>
+                        <li><strong>Rate Limiting:</strong> Limit request rates by IP, header, or custom key</li>
+                        <li><strong>Access Control:</strong> IP allowlists and denylists</li>
+                        <li><strong>Basic Auth:</strong> Username/password authentication via htpasswd</li>
+                        <li><strong>JWT Validation:</strong> Validate JSON Web Tokens (Plus)</li>
+                        <li><strong>OIDC:</strong> Native OpenID Connect integration (Plus)</li>
+                        <li><strong>API Key Auth:</strong> Authenticate via API keys in headers/query (Plus)</li>
+                        <li><strong>mTLS:</strong> Client certificate verification (ingress) and backend TLS (egress)</li>
+                        <li><strong>WAF:</strong> NGINX App Protect web application firewall (Plus)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4><span class="badge badge-transportserver" style="margin:0 8px 0 0">TS</span> TransportServer</h4>
+                    <p class="description">Configures TCP/UDP load balancing for non-HTTP protocols. Essential for databases, message queues, gaming servers, and other Layer 4 applications.</p>
+                    <ul>
+                        <li><strong>TCP Load Balancing:</strong> MySQL, PostgreSQL, Redis, custom TCP services</li>
+                        <li><strong>UDP Load Balancing:</strong> DNS, RADIUS, gaming protocols</li>
+                        <li><strong>TLS Passthrough:</strong> Pass encrypted traffic directly to backends</li>
+                        <li><strong>Health Checks:</strong> TCP/UDP health monitoring</li>
+                        <li><strong>Session Persistence:</strong> IP hash-based session affinity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4><span class="badge badge-transportserver" style="margin:0 8px 0 0">GC</span> GlobalConfiguration</h4>
+                    <p class="description">Cluster-wide configuration for the NGINX Ingress Controller. Defines global listeners for TCP/UDP and TLS passthrough that TransportServers can reference.</p>
+                    <ul>
+                        <li><strong>TCP/UDP Listeners:</strong> Define ports for non-HTTP traffic</li>
+                        <li><strong>TLS Passthrough Listeners:</strong> Configure SNI-based routing</li>
+                        <li><strong>Global Settings:</strong> Controller-wide configuration options</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+            <h2>Installing CRDs</h2>
+            <div class="install-box"><h6>Install All CRDs</h6>
+                <pre><code>kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds.yaml</code></pre>
+            </div>
+            <h3>Or Install Individually</h3>
+            <pre><code># VirtualServer and VirtualServerRoute
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualserverroutes.yaml
+
+# Policy
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml
+
+# TransportServer and GlobalConfiguration
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_transportservers.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_globalconfigurations.yaml</code></pre>
+            <div class="info-box note"><strong>Note:</strong> Replace <code>v3.4.0</code> with your controller version.</div>
+        </section>
+
+        <!-- Checklist -->
+        <section id="checklist">
+            <h2>Migration Checklist</h2>
+            <ul class="checklist">
+                <li>Install CRDs (VirtualServer, Policy, TransportServer, GlobalConfiguration)</li>
+                <li>Change annotation prefix from <code>nginx.ingress.kubernetes.io/</code> to <code>nginx.org/</code></li>
+                <li>Convert access control annotations to Policy CRD</li>
+                <li>Convert authentication to Policy CRD (basicAuth, jwt, oidc, apiKey)</li>
+                <li>Convert canary/traffic splitting to VirtualServer splits/matches</li>
+                <li>Convert mTLS to ingressMTLS/egressMTLS policies</li>
+                <li>Convert rate limiting to Policy CRD</li>
+                <li>Convert session affinity to VirtualServer sessionCookie</li>
+                <li>Convert SSL passthrough to TransportServer</li>
+                <li>Convert TCP/UDP services to TransportServer</li>
+                <li>Test in staging environment</li>
+                <li>Update monitoring and alerting</li>
+            </ul>
+        </section>
+
+        <!-- Resources -->
+        <section id="resources">
+            <h2>Additional Resources</h2>
+            <ul>
+                <li><a href="https://docs.nginx.com/nginx-ingress-controller/" target="_blank">Official Documentation</a></li>
+                <li><a href="https://docs.nginx.com/nginx-ingress-controller/configuration/virtualserver-and-virtualserverroute-resources/" target="_blank">VirtualServer Reference</a></li>
+                <li><a href="https://docs.nginx.com/nginx-ingress-controller/configuration/policy-resource/" target="_blank">Policy Reference</a></li>
+                <li><a href="https://docs.nginx.com/nginx-ingress-controller/configuration/transportserver-resource/" target="_blank">TransportServer Reference</a></li>
+                <li><a href="https://github.com/nginx/kubernetes-ingress" target="_blank">GitHub Repository</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>NGINX Ingress Migration Guide</p>
+            <p><a href="https://github.com/nginx/kubernetes-ingress" target="_blank">Official NGINX Ingress on GitHub</a></p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleRow(row) {
+            const exampleRow = row.nextElementSibling;
+            if (exampleRow && exampleRow.classList.contains('example-row')) {
+                row.classList.toggle('expanded');
+                exampleRow.classList.toggle('visible');
+            }
+        }
+        function expandAllExamples() {
+            document.querySelectorAll('.expandable').forEach(row => {
+                row.classList.add('expanded');
+                const exampleRow = row.nextElementSibling;
+                if (exampleRow && exampleRow.classList.contains('example-row')) exampleRow.classList.add('visible');
+            });
+        }
+        function collapseAllExamples() {
+            document.querySelectorAll('.expandable').forEach(row => {
+                row.classList.remove('expanded');
+                const exampleRow = row.nextElementSibling;
+                if (exampleRow && exampleRow.classList.contains('example-row')) exampleRow.classList.remove('visible');
+            });
+        }
+        function filterTable() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.mapping-table tbody tr').forEach(row => {
+                if (row.classList.contains('example-row')) {
+                    if (term) { row.classList.remove('visible'); row.previousElementSibling?.classList.remove('expanded'); }
+                    return;
+                }
+                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+            });
+        }
+        function copyInstall(btn, e) {
+            e.stopPropagation();
+            const code = btn.parentElement.nextElementSibling.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        }
+        document.querySelectorAll('nav a').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
