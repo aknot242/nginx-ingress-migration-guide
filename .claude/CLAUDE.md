@@ -23,6 +23,8 @@ There is no build system, test framework, or package manager. The project consis
 - `nginx-ingress-migration-guide-v3.html` — v3: Grouped related annotations into single expandable rows; added CRD install instructions per dropdown.
 - `nginx-ingress-migration-guide-v4.html` — v4: Split into OSS/Plus sections; alphabetical ordering; expanded CRD Features Summary; "How to Read the Mappings" guide.
 - `nginx-ingress-migration-guide-v5.html` — v5: All annotations from markdown guide; expandable examples for every row; dual Annotation/CRD tabs for rewrites, rate limiting, basic auth; improved search filtering that hides entire categories; GitHub contribution link.
+- `nginx-ingress-migration-guide-v6.html` — v6: Anchor IDs on all h2/h3 headings with hover-to-reveal permalink icons; badge flairs for Annotation, ConfigMap, and all CRD types; full `nginx.ingress.kubernetes.io/` prefix on community annotations; consistent 50% column widths; Route Delegation category for VirtualServerRoute CRD.
+- `nginx-ingress-migration-guide-v7.html` — v7: Interactive YAML Migration Analyzer; paste a community NGINX Ingress YAML manifest to get migration suggestions with color-coded result cards, summary pills, section deep-links with highlight, and sample YAML loader. 52-entry annotation mapping database with O(1) lookup. Safe DOM rendering (no innerHTML).
 
 ## Key Domain Concepts
 
@@ -42,13 +44,13 @@ There is no build system, test framework, or package manager. The project consis
 The HTML guide (`index.html`) follows these patterns:
 
 - **Self-contained**: All CSS and JavaScript are inline. No external dependencies.
-- **Sections**: Key Differences, OSS Mappings, Plus Mappings, CRD Features Summary, Installing CRDs, Migration Checklist, Additional Resources.
+- **Sections**: YAML Analyzer (v7+), Key Differences, OSS Mappings (22 categories incl. Route Delegation), Plus Mappings (6 categories), CRD Features Summary, Installing CRDs, Migration Checklist, Additional Resources.
 - **Table pattern**: Each category uses `<table class="mapping-table">` with two columns: community annotation → official equivalent.
 - **Expandable rows**: CRD-based mappings use paired rows:
   ```html
   <tr class="expandable" onclick="toggleRow(this)">
-      <td><div class="annotation-list"><code>annotation-1</code><code>annotation-2</code></div></td>
-      <td><span class="badge badge-policy">Policy</span> <code>crdField</code></td>
+      <td><div class="annotation-list"><code>nginx.ingress.kubernetes.io/annotation-1</code><code>nginx.ingress.kubernetes.io/annotation-2</code></div></td>
+      <td><span class="badge badge-policy">Policy CRD</span> <code>crdField</code></td>
   </tr>
   <tr class="example-row"><td colspan="2"><div class="example-content">
       <!-- install-box, comparison blocks, info-box -->
@@ -56,7 +58,7 @@ The HTML guide (`index.html`) follows these patterns:
   ```
 - **Grouped annotations**: Related annotations (e.g., all `session-cookie-*`) are listed vertically in `<div class="annotation-list">`.
 - **Install boxes**: Each CRD dropdown includes a `.install-box` with `kubectl apply` commands and a copy button.
-- **Badge classes**: `.badge-virtualserver`, `.badge-policy`, `.badge-transportserver`, `.badge-plus`.
+- **Badge classes**: `.badge-annotation`, `.badge-configmap`, `.badge-virtualserver`, `.badge-virtualserverroute`, `.badge-policy`, `.badge-transportserver`, `.badge-globalconfiguration`, `.badge-plus`. CRD badge text includes "CRD" suffix (e.g., "Policy CRD").
 - **Comparison blocks**: Side-by-side YAML using `.comparison > .comparison-block.old` / `.comparison-block.new`.
 - **Alphabetical ordering**: Categories within each section (OSS/Plus) and annotations within grouped rows are sorted alphabetically.
 - **Dual-example tabs**: Where a community annotation maps to either an annotation or a CRD, the example row uses a tabbed interface:
@@ -70,6 +72,7 @@ The HTML guide (`index.html`) follows these patterns:
   ```
   The CRD tab includes the `.install-box`; the annotation tab does not. Currently used in: Authentication (Basic), Rate Limiting, Rewrites.
 - **GitHub contribution link**: Present in the header (button with GitHub SVG icon), Additional Resources list, and footer. Points to `https://github.com/alessfg/nginx-ingress-migration-guide`.
+- **YAML Analyzer** (v7+): `<section id="analyzer">` with `<textarea id="yamlInput">` (dark theme), three action buttons (Analyze YAML, Clear, Load Sample), and `<div id="analyzerResults">`. Results are built via DOM methods: summary pills (`.analyzer-pill.found/.paths/.crds/.unrecognized`), result cards (`.analyzer-card.type-{annotation|configmap|virtualserver|policy|transportserver}`), and an unrecognized section. Each card has a header (found annotations + badge), body (migration arrow + target), and footer (category label + anchor link). The JS mapping database (`ANNOTATION_MAPPINGS`) contains 52 entries covering all community annotations, with `ANNOTATION_LOOKUP` Map for O(1) access by short annotation name.
 
 ## Markdown Guide Structure
 
@@ -116,3 +119,9 @@ These decisions were made iteratively during development and should be preserved
 8. **Every row is expandable** (v5+) — annotation-to-annotation rows show before/after YAML; CRD rows show install-box + CRD YAML; dual-approach rows use tabs.
 9. **Search hides entire categories** when no rows match, and collapses expanded example rows during search.
 10. A **GitHub contribution link** appears in the header, Additional Resources, and footer.
+11. All `<h2>` and `<h3>` headings have **`id` attributes** for direct linking, with **hover-to-reveal permalink icons** (GitHub-style chain-link SVG, injected via JS using safe DOM methods).
+12. **Badge flairs** mark the mapping type in the right column: `Annotation` (teal), `ConfigMap` (yellow), `VirtualServer CRD` (blue), `VirtualServerRoute CRD` (indigo), `Policy CRD` (purple), `TransportServer CRD` (orange), `GlobalConfiguration CRD` (brown), `Plus Required` (orange). Each CRD type has its own distinct badge class and color.
+13. Community annotations display the **full `nginx.ingress.kubernetes.io/` prefix** in the left column for clarity.
+14. Mapping table columns use **`width: 50%; white-space: nowrap`** for consistent alignment across all categories.
+15. **Route Delegation** category added to OSS Mappings for VirtualServerRoute CRD (N/A on community side).
+16. **YAML Migration Analyzer** (v7+) is the first section, before Key Differences. Uses a `const ANNOTATION_MAPPINGS` array (52 entries) with a `Map`-based `ANNOTATION_LOOKUP` for O(1) annotation resolution. The YAML parser is line-based (no external library), handles multi-document YAML (`---`), inline annotations, quoted keys/values, and comments. Results are rendered using safe DOM methods (`createElement`/`textContent`) — no `innerHTML`. Cards are color-coded by migration type with left borders matching badge colors. Summary pills show annotation count, migration paths, CRD requirements, and unrecognized counts. "View full migration example" links scroll to the relevant section anchor and apply a 2-second yellow highlight via `highlightSection()`.
