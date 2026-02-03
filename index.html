@@ -27,6 +27,7 @@
         nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
         nav a { color: var(--primary-color); text-decoration: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; transition: all 0.3s; }
         nav a:hover { background: var(--primary-color); color: white; }
+        nav a.active { background: var(--primary-color); color: white; }
         main { padding: 20px 0 60px; }
         section { background: var(--card-bg); border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         h2 { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 25px; font-size: 1.8rem; }
@@ -76,6 +77,9 @@
         .info-box.note { background: #e3f2fd; border-left: 4px solid #2196f3; }
         .info-box.tip { background: #e8f5e9; border-left: 4px solid #4caf50; }
         .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .controls input[type="text"] { padding: 10px 16px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; min-width: 240px; flex: 1; max-width: 400px; }
+        .controls input[type="text"]:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,150,57,0.12); }
+        .controls input[type="text"]::placeholder { color: #999; }
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; }
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-primary:hover { background: var(--primary-dark); }
@@ -121,7 +125,9 @@
         #yamlInput:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,150,57,0.15); }
         .analyzer-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         .analyzer-summary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .analyzer-pill { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .analyzer-pill { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; transition: transform 0.15s, box-shadow 0.15s; }
+        .analyzer-pill[data-scroll] { cursor: pointer; }
+        .analyzer-pill[data-scroll]:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
         .analyzer-pill.found { background: #e8f5e9; color: #2e7d32; }
         .analyzer-pill.paths { background: #e3f2fd; color: #1565c0; }
         .analyzer-pill.crds { background: #fff3e0; color: #ef6c00; }
@@ -151,6 +157,180 @@
         .analyzer-unrecognized-section { margin-top: 20px; }
         .analyzer-unrecognized-section h4 { color: #c62828; margin-bottom: 10px; font-size: 1rem; }
         .plus-indicator { font-size: 0.75rem; padding: 2px 6px; background: #fff3e0; color: #e65100; border-radius: 8px; font-weight: 500; margin-left: 6px; }
+        .analyzer-step { margin-top: 25px; padding-left: 20px; border-left: 2px solid var(--border-color); margin-left: 15px; position: relative; }
+        .analyzer-step:last-of-type { border-left-color: transparent; }
+        .analyzer-step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; position: relative; }
+        .analyzer-step-number { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; flex-shrink: 0; position: relative; left: -37px; margin-right: -25px; z-index: 1; box-shadow: 0 0 0 4px var(--card-bg); }
+        .analyzer-step-title { font-size: 1.1rem; font-weight: 700; color: var(--text-color); }
+        .analyzer-step-desc { font-size: 0.9rem; color: #666; margin-bottom: 12px; }
+        .analyzer-yaml-output { position: relative; background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.85rem; line-height: 1.5; overflow-x: auto; white-space: pre; margin: 10px 0; }
+        .analyzer-copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #ccc; padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; z-index: 1; }
+        .analyzer-copy-btn:hover { background: rgba(255,255,255,0.25); color: white; }
+        .analyzer-copy-btn.copied { background: #4caf50; color: white; border-color: #4caf50; }
+        .analyzer-install-cmd { background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 12px 16px; border-radius: 8px; margin: 10px 0; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.82rem; line-height: 1.5; overflow-x: auto; position: relative; }
+        .analyzer-install-cmd .analyzer-copy-btn { top: 6px; right: 6px; }
+        .analyzer-details-toggle { background: none; border: none; color: var(--primary-color); font-size: 0.85rem; cursor: pointer; padding: 6px 0; font-weight: 500; display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+        .analyzer-details-toggle:hover { text-decoration: underline; }
+        .analyzer-details-toggle::before { content: '▶'; font-size: 0.65rem; transition: transform 0.2s; display: inline-block; }
+        .analyzer-details-toggle.expanded::before { transform: rotate(90deg); }
+        .analyzer-details-container { margin-top: 8px; max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.35s ease, opacity 0.25s ease; }
+        .analyzer-details-container.visible { max-height: 5000px; opacity: 1; }
+        .analyzer-step-separator { border: none; border-top: 1px dashed var(--border-color); margin: 15px 0 0; }
+        .analyzer-crd-group { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid var(--border-color); }
+        .analyzer-crd-group-title { font-size: 0.95rem; font-weight: 600; color: var(--secondary-color); margin-bottom: 8px; }
+        .analyzer-dual-note { font-size: 0.82rem; color: #888; font-style: italic; margin-top: 4px; }
+        .yaml-key { color: #9cdcfe; }
+        .yaml-value { color: #ce9178; }
+        .yaml-comment { color: #6a9955; font-style: italic; }
+        .yaml-keyword { color: #569cd6; }
+        .yaml-bool { color: #569cd6; }
+        .yaml-number { color: #b5cea8; }
+        .yaml-separator { color: #808080; }
+        .yaml-anchor { color: #dcdcaa; }
+        .analyzer-step-icon { font-size: 1.1rem; margin-right: 2px; }
+        .analyzer-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 10px 0; }
+        @media (max-width: 900px) { .analyzer-comparison { grid-template-columns: 1fr; } }
+        .analyzer-comparison-block { border-radius: 8px; overflow: hidden; }
+        .analyzer-comparison-block h5 { padding: 8px 12px; margin: 0; font-size: 0.82rem; font-weight: 600; }
+        .analyzer-comparison-block.old h5 { background: #ffebee; color: #c62828; }
+        .analyzer-comparison-block.new h5 { background: #e8f5e9; color: #2e7d32; }
+        .analyzer-comparison-block .analyzer-yaml-output { margin: 0; border-radius: 0 0 8px 8px; min-height: 60px; }
+        .analyzer-copy-all { display: flex; align-items: center; gap: 8px; margin-top: 20px; padding: 12px 20px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .analyzer-copy-all:hover { background: var(--primary-dark); }
+        .analyzer-copy-all.copied { background: #4caf50; }
+        .analyzer-copy-all svg { flex-shrink: 0; }
+        .analyzer-step-count { font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 12px; background: #e8f5e9; color: #2e7d32; margin-left: 8px; }
+        .analyzer-step-count.configmap { background: #fff9c4; color: #f57f17; }
+        .analyzer-step-count.crd { background: #f3e5f5; color: #7b1fa2; }
+        .yaml-diff-line { display: inline-block; width: calc(100% + 40px); margin: 0 -20px; padding: 0 20px; }
+        .yaml-diff-line.removed { background: rgba(198, 40, 40, 0.12); }
+        .yaml-diff-line.added { background: rgba(46, 125, 50, 0.12); }
+        @media (max-width: 600px) {
+            .analyzer-actions { flex-direction: column; }
+            .analyzer-actions .btn { width: 100%; text-align: center; }
+            .controls input[type="text"] { min-width: 100%; max-width: 100%; }
+            .analyzer-step-header { flex-wrap: wrap; }
+            .analyzer-step-count { margin-left: 44px; margin-top: -4px; }
+            .analyzer-copy-all { width: 100%; justify-content: center; }
+            .analyzer-download-btn { width: 100%; justify-content: center; }
+            .analyzer-export-actions { flex-direction: column; }
+        }
+        .analyzer-empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .analyzer-empty-state svg { margin-bottom: 12px; opacity: 0.4; }
+        .analyzer-empty-state p { font-size: 0.9rem; margin: 4px 0; }
+        .analyzer-empty-state .hint { font-size: 0.82rem; color: #bbb; }
+        .analyzer-success-banner { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 8px; margin-bottom: 16px; border: 1px solid #a5d6a7; }
+        .analyzer-success-banner svg { flex-shrink: 0; color: #2e7d32; }
+        .analyzer-success-banner .banner-text { font-size: 0.9rem; color: #1b5e20; font-weight: 500; }
+        .analyzer-success-banner .banner-text strong { font-weight: 700; }
+        .analyzer-next-steps { margin-top: 24px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid var(--border-color); }
+        .analyzer-next-steps h4 { color: var(--primary-color); margin: 0 0 12px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .analyzer-next-steps ul { list-style: none; padding: 0; margin: 0; }
+        .analyzer-next-steps li { padding: 6px 0; font-size: 0.9rem; }
+        .analyzer-next-steps li::before { content: '\2192'; color: var(--primary-color); margin-right: 8px; font-weight: 600; }
+        .analyzer-next-steps a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+        .analyzer-next-steps a:hover { text-decoration: underline; }
+        .analyzer-complexity { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 600; }
+        .analyzer-complexity.simple { background: #e8f5e9; color: #2e7d32; }
+        .analyzer-complexity.moderate { background: #fff9c4; color: #f57f17; }
+        .analyzer-complexity.advanced { background: #fce4ec; color: #c62828; }
+        .analyzer-complexity-dots { display: flex; gap: 3px; }
+        .analyzer-complexity-dots span { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.25; }
+        .analyzer-complexity-dots span.filled { opacity: 1; }
+        .analyzer-yaml-output.collapsed { max-height: 200px; overflow: hidden; }
+        .analyzer-yaml-output.collapsed::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(transparent, #1e1e1e); pointer-events: none; }
+        .analyzer-yaml-expand { background: none; border: 1px solid var(--border-color); color: var(--primary-color); padding: 4px 14px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin-top: 4px; font-weight: 500; transition: all 0.2s; }
+        .analyzer-yaml-expand:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .analyzer-edit-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--card-bg); border: 2px solid var(--primary-color); color: var(--primary-color); border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 16px; }
+        .analyzer-edit-btn:hover { background: var(--primary-color); color: white; }
+        @keyframes analyzerFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .analyzer-fade-in { animation: analyzerFadeIn 0.4s ease forwards; opacity: 0; }
+        .analyzer-input-status { display: flex; gap: 16px; margin-top: 6px; font-size: 0.78rem; color: #999; align-items: center; flex-wrap: wrap; }
+        .analyzer-input-status .status-item { display: flex; align-items: center; gap: 4px; }
+        .analyzer-input-status .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .analyzer-input-status .status-dot.active { background: var(--primary-color); }
+        .analyzer-input-status .status-dot.inactive { background: #ccc; }
+        .analyzer-drop-zone { position: relative; }
+        .analyzer-drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 150, 57, 0.08); border: 3px dashed var(--primary-color); border-radius: 8px; z-index: 10; align-items: center; justify-content: center; pointer-events: none; }
+        .analyzer-drop-zone.dragging .analyzer-drop-overlay { display: flex; }
+        .analyzer-drop-zone.dragging #yamlInput { opacity: 0.5; }
+        .analyzer-drop-label { background: white; padding: 12px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; color: var(--primary-color); box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .analyzer-export-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; align-items: center; }
+        .analyzer-download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--secondary-color); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .analyzer-download-btn:hover { background: #005299; }
+        .analyzer-download-btn.downloaded { background: #4caf50; }
+        .analyzer-download-btn svg { flex-shrink: 0; }
+        body.dark-mode { --bg-color: #1a1a2e; --card-bg: #16213e; --text-color: #e0e0e0; --border-color: #2a2a4a; --code-bg: #0f3460; }
+        body.dark-mode header { background: linear-gradient(135deg, #006b2b, #004d1f); }
+        body.dark-mode nav { background: #16213e; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        body.dark-mode nav a { color: #66bb6a; }
+        body.dark-mode nav a:hover, body.dark-mode nav a.active { background: #66bb6a; color: #1a1a2e; }
+        body.dark-mode section { background: var(--card-bg); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        body.dark-mode h2 { color: #66bb6a; border-bottom-color: #66bb6a; }
+        body.dark-mode h3 { color: #64b5f6; }
+        body.dark-mode th { background: #006b2b; }
+        body.dark-mode tr.expandable:hover { background-color: rgba(102,187,106,0.1); }
+        body.dark-mode tr:not(.expandable):not(.example-row):hover { background-color: rgba(255,255,255,0.03); }
+        body.dark-mode tr.example-row td { background: #0f3460; }
+        body.dark-mode .example-content { background: #16213e; border-left-color: #66bb6a; }
+        body.dark-mode code { background: rgba(15,52,96,0.5); color: #f48fb1; }
+        body.dark-mode .info-box.note { background: rgba(33,150,243,0.1); }
+        body.dark-mode .info-box.tip { background: rgba(76,175,80,0.1); }
+        body.dark-mode .controls input[type="text"] { background: #0f3460; color: #e0e0e0; border-color: #2a2a4a; }
+        body.dark-mode .controls input[type="text"]::placeholder { color: #666; }
+        body.dark-mode .controls input[type="text"]:focus { border-color: #66bb6a; box-shadow: 0 0 0 3px rgba(102,187,106,0.15); }
+        body.dark-mode .legend { background: #0f3460; }
+        body.dark-mode .edition-header.oss { background: linear-gradient(135deg, rgba(102,187,106,0.1), rgba(102,187,106,0.05)); }
+        body.dark-mode .edition-header.plus { background: linear-gradient(135deg, rgba(245,124,0,0.15), rgba(245,124,0,0.05)); }
+        body.dark-mode .comparison-block.old h5 { background: rgba(198,40,40,0.15); color: #ef9a9a; }
+        body.dark-mode .comparison-block.new h5 { background: rgba(46,125,50,0.15); color: #a5d6a7; }
+        body.dark-mode .feature-card { background: #0f3460; border-color: #2a2a4a; }
+        body.dark-mode .feature-card .description { color: #aaa; }
+        body.dark-mode footer { background: #0d1b2a; }
+        body.dark-mode .btn-secondary { background: #2a2a4a; color: #e0e0e0; }
+        body.dark-mode .btn-secondary:hover { background: #3a3a5a; }
+        body.dark-mode .analyzer-success-banner { background: linear-gradient(135deg, rgba(46,125,50,0.15), rgba(46,125,50,0.08)); border-color: rgba(46,125,50,0.3); }
+        body.dark-mode .analyzer-success-banner .banner-text { color: #a5d6a7; }
+        body.dark-mode .analyzer-next-steps { background: #0f3460; border-color: #2a2a4a; }
+        body.dark-mode .analyzer-next-steps h4 { color: #66bb6a; }
+        body.dark-mode .analyzer-crd-group { background: #0f3460; border-color: #2a2a4a; }
+        body.dark-mode .analyzer-card { background: #0f3460; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+        body.dark-mode .analyzer-card-body { border-top-color: #2a2a4a; }
+        body.dark-mode .analyzer-card-footer .category-label { color: #888; }
+        body.dark-mode .analyzer-comparison-block.old h5 { background: rgba(198,40,40,0.15); color: #ef9a9a; }
+        body.dark-mode .analyzer-comparison-block.new h5 { background: rgba(46,125,50,0.15); color: #a5d6a7; }
+        body.dark-mode .analyzer-edit-btn { background: #16213e; border-color: #66bb6a; color: #66bb6a; }
+        body.dark-mode .analyzer-edit-btn:hover { background: #66bb6a; color: #1a1a2e; }
+        body.dark-mode .analyzer-yaml-expand { border-color: #2a2a4a; color: #66bb6a; }
+        body.dark-mode .analyzer-yaml-expand:hover { background: #66bb6a; color: #1a1a2e; border-color: #66bb6a; }
+        body.dark-mode .analyzer-step { border-left-color: #2a2a4a; }
+        body.dark-mode .analyzer-step-number { box-shadow: 0 0 0 4px var(--card-bg); }
+        body.dark-mode .analyzer-empty-state svg { stroke: #666; }
+        body.dark-mode .analyzer-step-separator { border-top-color: #2a2a4a; }
+        body.dark-mode .checklist li { border-bottom-color: #2a2a4a; }
+        body.dark-mode td, body.dark-mode th { border-bottom-color: #2a2a4a; }
+        .nav-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--primary-color); color: white; font-size: 0.7rem; font-weight: 700; margin-left: 5px; line-height: 1; }
+        body.dark-mode .nav-badge { background: #66bb6a; color: #1a1a2e; }
+        .dark-toggle { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
+        .dark-toggle:hover { background: rgba(255,255,255,0.25); }
+        .annotation-tooltip { position: relative; cursor: help; }
+        .annotation-tooltip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; white-space: nowrap; max-width: 320px; white-space: normal; line-height: 1.4; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .annotation-tooltip::before { content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #333; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 20; }
+        .annotation-tooltip:hover::after, .annotation-tooltip:hover::before { opacity: 1; }
+        @media print {
+            nav, header, footer, .analyzer-actions, .analyzer-input-status, .analyzer-drop-zone, .analyzer-copy-btn, .analyzer-copy-all, .analyzer-download-btn, .analyzer-edit-btn, .analyzer-yaml-expand, .analyzer-empty-state, .controls, .legend, .analyzer-export-actions { display: none !important; }
+            section { box-shadow: none; break-inside: avoid; }
+            .analyzer-yaml-output { background: #f5f5f5 !important; color: #333 !important; border: 1px solid #ccc; }
+            .analyzer-yaml-output.collapsed { max-height: none !important; overflow: visible !important; }
+            .analyzer-yaml-output.collapsed::after { display: none !important; }
+            .yaml-key { color: #0066b3 !important; }
+            .yaml-value { color: #c62828 !important; }
+            .yaml-comment { color: #666 !important; }
+            .analyzer-install-cmd { background: #f0f0f0 !important; color: #333 !important; border: 1px solid #ccc; }
+            .analyzer-success-banner { border: 1px solid #999; }
+            body { background: white; font-size: 11pt; }
+            .analyzer-details-container { max-height: none !important; opacity: 1 !important; }
+        }
     </style>
 </head>
 <body>
@@ -160,10 +340,16 @@
                 <h1>NGINX Ingress Migration Guide</h1>
                 <p>Migrate from Kubernetes Community NGINX Ingress to Official NGINX Ingress Controller</p>
             </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()">
+                <svg id="darkIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span id="darkLabel">Dark Mode</span>
+            </button>
             <a href="https://github.com/alessfg/nginx-ingress-migration-guide" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);color:white;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:0.9rem;border:1px solid rgba(255,255,255,0.3);transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
                 <svg width="20" height="20" viewBox="0 0 16 16" fill="white"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
                 Contribute on GitHub
             </a>
+            </div>
         </div>
     </header>
 
@@ -186,7 +372,9 @@
         <section id="analyzer">
             <h2 id="yaml-analyzer">YAML Migration Analyzer</h2>
             <p>Paste a Kubernetes Ingress YAML manifest that uses community NGINX Ingress annotations to get migration suggestions for the Official NGINX Ingress Controller.</p>
-            <textarea id="yamlInput" placeholder="apiVersion: networking.k8s.io/v1
+            <div class="analyzer-drop-zone" id="dropZone">
+                <div class="analyzer-drop-overlay"><span class="analyzer-drop-label">Drop YAML file here</span></div>
+                <textarea id="yamlInput" placeholder="apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-ingress
@@ -196,10 +384,16 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: &quot;10m&quot;
 spec:
   ..."></textarea>
+            </div>
+            <div class="analyzer-input-status" id="inputStatus">
+                <span class="status-item"><span class="status-dot inactive" id="statusDot"></span><span id="statusLines">0 lines</span></span>
+                <span class="status-item" id="statusAnnotations" style="display:none;"><span class="status-dot active"></span><span id="statusAnnotationCount">0 annotations detected</span></span>
+            </div>
             <div class="analyzer-actions">
                 <button class="btn btn-primary" onclick="analyzeYaml()">Analyze YAML</button>
                 <button class="btn btn-secondary" onclick="clearAnalyzer()">Clear</button>
                 <button class="btn btn-secondary" onclick="loadSampleYaml()">Load Sample</button>
+                <span style="font-size:0.78rem;color:#999;margin-left:4px;align-self:center;">Ctrl+Enter to analyze</span>
             </div>
             <div id="analyzerResults"></div>
         </section>
@@ -1968,78 +2162,130 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
         // --- YAML Migration Analyzer ---
         const ANNOTATION_MAPPINGS = [
             // Access Control
-            { community: ["denylist-source-range", "whitelist-source-range"], official: "Policy CRD accessControl", type: "policy", category: "Access Control", anchor: "access-control", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["satisfy"], official: "Annotation nginx.org/location-snippets (satisfy directive)", type: "annotation", category: "Access Control", anchor: "access-control", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["denylist-source-range", "whitelist-source-range"], official: "Policy CRD accessControl", type: "policy", category: "Access Control", anchor: "access-control", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateAccessControlPolicy" } },
+            { community: ["satisfy"], official: "Annotation nginx.org/location-snippets (satisfy directive)", type: "annotation", category: "Access Control", anchor: "access-control", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "satisfy": { key: "nginx.org/location-snippets", transform: "snippetWrap", template: "satisfy ${value};" } } } },
             // Authentication (Basic)
-            { community: ["auth-realm", "auth-secret", "auth-secret-type", "auth-type"], official: "Annotation nginx.org/basic-auth-* or Policy CRD basicAuth", type: "policy", category: "Authentication (Basic)", anchor: "authentication-basic", section: "oss", dualApproach: true, plusRequired: false },
+            { community: ["auth-realm", "auth-secret", "auth-secret-type", "auth-type"], official: "Annotation nginx.org/basic-auth-* or Policy CRD basicAuth", type: "policy", category: "Authentication (Basic)", anchor: "authentication-basic", section: "oss", dualApproach: true, plusRequired: false,
+              officialMapping: { annotations: { "auth-secret": { key: "nginx.org/basic-auth-secret", transform: "direct" }, "auth-realm": { key: "nginx.org/basic-auth-realm", transform: "direct" } }, crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateBasicAuthPolicy" } },
             // Buffering
-            { community: ["client-body-buffer-size"], official: "Annotation nginx.org/client-body-buffer-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-body-size"], official: "Annotation nginx.org/client-max-body-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-buffer-size"], official: "Annotation nginx.org/proxy-buffer-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-buffering"], official: "Annotation nginx.org/proxy-buffering", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-buffers-number"], official: "Annotation nginx.org/proxy-buffers", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-busy-buffers-size"], official: "Annotation nginx.org/proxy-busy-buffers-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-max-temp-file-size"], official: "Annotation nginx.org/proxy-max-temp-file-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-request-buffering"], official: "ConfigMap proxy-request-buffering", type: "configmap", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["client-body-buffer-size"], official: "Annotation nginx.org/client-body-buffer-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "client-body-buffer-size": { key: "nginx.org/client-body-buffer-size", transform: "direct" } } } },
+            { community: ["proxy-body-size"], official: "Annotation nginx.org/client-max-body-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-body-size": { key: "nginx.org/client-max-body-size", transform: "direct" } } } },
+            { community: ["proxy-buffer-size"], official: "Annotation nginx.org/proxy-buffer-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-buffer-size": { key: "nginx.org/proxy-buffer-size", transform: "direct" } } } },
+            { community: ["proxy-buffering"], official: "Annotation nginx.org/proxy-buffering", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-buffering": { key: "nginx.org/proxy-buffering", transform: "direct" } } } },
+            { community: ["proxy-buffers-number"], official: "Annotation nginx.org/proxy-buffers", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-buffers-number": { key: "nginx.org/proxy-buffers", transform: "appendBufferSize" } } } },
+            { community: ["proxy-busy-buffers-size"], official: "Annotation nginx.org/proxy-busy-buffers-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-busy-buffers-size": { key: "nginx.org/proxy-busy-buffers-size", transform: "direct" } } } },
+            { community: ["proxy-max-temp-file-size"], official: "Annotation nginx.org/proxy-max-temp-file-size", type: "annotation", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-max-temp-file-size": { key: "nginx.org/proxy-max-temp-file-size", transform: "direct" } } } },
+            { community: ["proxy-request-buffering"], official: "ConfigMap proxy-request-buffering", type: "configmap", category: "Buffering", anchor: "buffering", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { configMap: { "proxy-request-buffering": { key: "proxy-request-buffering", transform: "direct" } } } },
             // Canary / Traffic Splitting
-            { community: ["canary", "canary-by-cookie", "canary-by-header", "canary-by-header-pattern", "canary-by-header-value", "canary-weight", "canary-weight-total"], official: "VirtualServer CRD splits[]/matches[]", type: "virtualserver", category: "Canary / Traffic Splitting", anchor: "canary-traffic-splitting", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["canary", "canary-by-cookie", "canary-by-header", "canary-by-header-pattern", "canary-by-header-value", "canary-weight", "canary-weight-total"], official: "VirtualServer CRD splits[]/matches[]", type: "virtualserver", category: "Canary / Traffic Splitting", anchor: "canary-traffic-splitting", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateCanaryVirtualServer" } },
             // Configuration Snippets
-            { community: ["configuration-snippet"], official: "Annotation nginx.org/location-snippets", type: "annotation", category: "Configuration Snippets", anchor: "configuration-snippets", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["server-snippet"], official: "Annotation nginx.org/server-snippets", type: "annotation", category: "Configuration Snippets", anchor: "configuration-snippets", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["stream-snippet"], official: "TransportServer CRD or GlobalConfiguration", type: "transportserver", category: "Configuration Snippets", anchor: "configuration-snippets", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["configuration-snippet"], official: "Annotation nginx.org/location-snippets", type: "annotation", category: "Configuration Snippets", anchor: "configuration-snippets", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "configuration-snippet": { key: "nginx.org/location-snippets", transform: "direct" } } } },
+            { community: ["server-snippet"], official: "Annotation nginx.org/server-snippets", type: "annotation", category: "Configuration Snippets", anchor: "configuration-snippets", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "server-snippet": { key: "nginx.org/server-snippets", transform: "direct" } } } },
+            { community: ["stream-snippet"], official: "TransportServer CRD or GlobalConfiguration", type: "transportserver", category: "Configuration Snippets", anchor: "configuration-snippets", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "TransportServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_transportservers.yaml", templateFn: "generateStreamSnippetTS" } },
             // CORS
-            { community: ["cors-allow-credentials", "cors-allow-headers", "cors-allow-methods", "cors-allow-origin", "cors-expose-headers", "cors-max-age", "enable-cors"], official: "Annotation nginx.org/server-snippets or location-snippets (CORS headers)", type: "annotation", category: "CORS", anchor: "cors", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["cors-allow-credentials", "cors-allow-headers", "cors-allow-methods", "cors-allow-origin", "cors-expose-headers", "cors-max-age", "enable-cors"], official: "Annotation nginx.org/server-snippets or location-snippets (CORS headers)", type: "annotation", category: "CORS", anchor: "cors", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "enable-cors": { key: "nginx.org/server-snippets", transform: "corsSnippet" } } } },
             // Error Handling
-            { community: ["custom-http-errors", "default-backend"], official: "VirtualServer CRD errorPages[]", type: "virtualserver", category: "Error Handling", anchor: "error-handling", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["custom-http-errors", "default-backend"], official: "VirtualServer CRD errorPages[]", type: "virtualserver", category: "Error Handling", anchor: "error-handling", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateErrorPagesVirtualServer" } },
             // Headers
-            { community: ["connection-proxy-header"], official: "Snippets or ConfigMap", type: "configmap", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["custom-headers"], official: "VirtualServer CRD responseHeaders.add", type: "virtualserver", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-hide-headers"], official: "Annotation nginx.org/proxy-hide-headers", type: "annotation", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-pass-headers"], official: "Annotation nginx.org/proxy-pass-headers", type: "annotation", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["upstream-vhost", "x-forwarded-prefix"], official: "VirtualServer CRD requestHeaders.set", type: "virtualserver", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["connection-proxy-header"], official: "Snippets or ConfigMap", type: "configmap", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "connection-proxy-header": { key: "nginx.org/location-snippets", transform: "snippetWrap", template: "proxy_set_header Connection \"${value}\";" } } } },
+            { community: ["custom-headers"], official: "VirtualServer CRD responseHeaders.add", type: "virtualserver", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateCustomHeadersVS" } },
+            { community: ["proxy-hide-headers"], official: "Annotation nginx.org/proxy-hide-headers", type: "annotation", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-hide-headers": { key: "nginx.org/proxy-hide-headers", transform: "direct" } } } },
+            { community: ["proxy-pass-headers"], official: "Annotation nginx.org/proxy-pass-headers", type: "annotation", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-pass-headers": { key: "nginx.org/proxy-pass-headers", transform: "direct" } } } },
+            { community: ["upstream-vhost", "x-forwarded-prefix"], official: "VirtualServer CRD requestHeaders.set", type: "virtualserver", category: "Headers", anchor: "headers", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateRequestHeadersVS" } },
             // Load Balancing
-            { community: ["load-balance"], official: "Annotation nginx.org/lb-method", type: "annotation", category: "Load Balancing", anchor: "load-balancing", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["service-upstream"], official: "Annotation nginx.org/use-cluster-ip", type: "annotation", category: "Load Balancing", anchor: "load-balancing", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["upstream-hash-by", "upstream-hash-by-subset", "upstream-hash-by-subset-size"], official: "VirtualServer CRD upstreams[].lb-method", type: "virtualserver", category: "Load Balancing", anchor: "load-balancing", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["load-balance"], official: "Annotation nginx.org/lb-method", type: "annotation", category: "Load Balancing", anchor: "load-balancing", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "load-balance": { key: "nginx.org/lb-method", transform: "direct" } } } },
+            { community: ["service-upstream"], official: "Annotation nginx.org/use-cluster-ip", type: "annotation", category: "Load Balancing", anchor: "load-balancing", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "service-upstream": { key: "nginx.org/use-cluster-ip", transform: "direct" } } } },
+            { community: ["upstream-hash-by", "upstream-hash-by-subset", "upstream-hash-by-subset-size"], official: "VirtualServer CRD upstreams[].lb-method", type: "virtualserver", category: "Load Balancing", anchor: "load-balancing", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateHashLBVirtualServer" } },
             // mTLS (Client)
-            { community: ["auth-tls-error-page", "auth-tls-pass-certificate-to-upstream", "auth-tls-secret", "auth-tls-verify-client", "auth-tls-verify-depth"], official: "Policy CRD ingressMTLS", type: "policy", category: "mTLS (Client)", anchor: "mtls-client", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["auth-tls-error-page", "auth-tls-pass-certificate-to-upstream", "auth-tls-secret", "auth-tls-verify-client", "auth-tls-verify-depth"], official: "Policy CRD ingressMTLS", type: "policy", category: "mTLS (Client)", anchor: "mtls-client", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateIngressMTLSPolicy" } },
             // mTLS (Backend)
-            { community: ["proxy-ssl-ciphers", "proxy-ssl-protocols", "proxy-ssl-secret", "proxy-ssl-server-name", "proxy-ssl-verify", "proxy-ssl-verify-depth"], official: "Policy CRD egressMTLS", type: "policy", category: "mTLS (Backend)", anchor: "mtls-backend", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["proxy-ssl-ciphers", "proxy-ssl-protocols", "proxy-ssl-secret", "proxy-ssl-server-name", "proxy-ssl-verify", "proxy-ssl-verify-depth"], official: "Policy CRD egressMTLS", type: "policy", category: "mTLS (Backend)", anchor: "mtls-backend", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateEgressMTLSPolicy" } },
             // Miscellaneous
-            { community: ["enable-access-log"], official: "ConfigMap access-log-off", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["enable-opentelemetry"], official: "ConfigMap OpenTelemetry settings", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["http2-push-preload"], official: "ConfigMap http2-push-preload", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["mirror-target"], official: "Annotation nginx.org/location-snippets with mirror directive", type: "annotation", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-http-version"], official: "ConfigMap proxy-protocol", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["server-alias"], official: "Create additional VirtualServer resources", type: "virtualserver", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["server-tokens"], official: "Annotation nginx.org/server-tokens", type: "annotation", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["websocket-services"], official: "Annotation nginx.org/websocket-services", type: "annotation", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["enable-access-log"], official: "ConfigMap access-log-off", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { configMap: { "enable-access-log": { key: "access-log-off", transform: "booleanInvert" } } } },
+            { community: ["enable-opentelemetry"], official: "ConfigMap OpenTelemetry settings", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { configMap: { "enable-opentelemetry": { key: "opentelemetry", transform: "direct" } } } },
+            { community: ["http2-push-preload"], official: "ConfigMap http2-push-preload", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { configMap: { "http2-push-preload": { key: "http2-push-preload", transform: "direct" } } } },
+            { community: ["mirror-target"], official: "Annotation nginx.org/location-snippets with mirror directive", type: "annotation", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "mirror-target": { key: "nginx.org/location-snippets", transform: "snippetWrap", template: "mirror /mirror;\nmirror_request_body on;" } } } },
+            { community: ["proxy-http-version"], official: "ConfigMap proxy-protocol", type: "configmap", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { configMap: { "proxy-http-version": { key: "proxy-protocol", transform: "direct" } } } },
+            { community: ["server-alias"], official: "Create additional VirtualServer resources", type: "virtualserver", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateServerAliasVS" } },
+            { community: ["server-tokens"], official: "Annotation nginx.org/server-tokens", type: "annotation", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "server-tokens": { key: "nginx.org/server-tokens", transform: "direct" } } } },
+            { community: ["websocket-services"], official: "Annotation nginx.org/websocket-services", type: "annotation", category: "Miscellaneous", anchor: "miscellaneous", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "websocket-services": { key: "nginx.org/websocket-services", transform: "direct" } } } },
             // Proxy Settings
-            { community: ["proxy-next-upstream", "proxy-next-upstream-timeout", "proxy-next-upstream-tries"], official: "VirtualServer CRD upstreams[].next-upstream*", type: "virtualserver", category: "Proxy Settings", anchor: "proxy-settings", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["proxy-next-upstream", "proxy-next-upstream-timeout", "proxy-next-upstream-tries"], official: "VirtualServer CRD upstreams[].next-upstream*", type: "virtualserver", category: "Proxy Settings", anchor: "proxy-settings", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateProxyNextUpstreamVS" } },
             // Rate Limiting
-            { community: ["limit-burst-multiplier", "limit-connections", "limit-rate", "limit-rate-after", "limit-rpm", "limit-rps", "limit-whitelist"], official: "Annotation nginx.org/limit-req-* or Policy CRD rateLimit", type: "policy", category: "Rate Limiting", anchor: "rate-limiting", section: "oss", dualApproach: true, plusRequired: false },
+            { community: ["limit-burst-multiplier", "limit-connections", "limit-rate", "limit-rate-after", "limit-rpm", "limit-rps", "limit-whitelist"], official: "Annotation nginx.org/limit-req-* or Policy CRD rateLimit", type: "policy", category: "Rate Limiting", anchor: "rate-limiting", section: "oss", dualApproach: true, plusRequired: false,
+              officialMapping: { annotations: { "limit-rps": { key: "nginx.org/limit-req-rate", transform: "appendRateUnit" }, "limit-burst-multiplier": { key: "nginx.org/limit-req-burst", transform: "direct" } }, crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateRateLimitPolicy" } },
             // Redirects
-            { community: ["from-to-www-redirect", "permanent-redirect", "permanent-redirect-code", "temporal-redirect"], official: "VirtualServer CRD action.redirect", type: "virtualserver", category: "Redirects", anchor: "redirects", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["from-to-www-redirect", "permanent-redirect", "permanent-redirect-code", "temporal-redirect"], official: "VirtualServer CRD action.redirect", type: "virtualserver", category: "Redirects", anchor: "redirects", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateRedirectVirtualServer" } },
             // Rewrites
-            { community: ["app-root", "rewrite-target", "use-regex"], official: "Annotation nginx.org/rewrites or VirtualServer CRD rewritePath", type: "virtualserver", category: "Rewrites", anchor: "rewrites", section: "oss", dualApproach: true, plusRequired: false },
-            { community: ["proxy-redirect-from", "proxy-redirect-to"], official: "ConfigMap or Annotation nginx.org/server-snippets", type: "configmap", category: "Rewrites", anchor: "rewrites", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["app-root", "rewrite-target", "use-regex"], official: "Annotation nginx.org/rewrites or VirtualServer CRD rewritePath", type: "virtualserver", category: "Rewrites", anchor: "rewrites", section: "oss", dualApproach: true, plusRequired: false,
+              officialMapping: { annotations: { "rewrite-target": { key: "nginx.org/rewrites", transform: "direct" } }, crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateRewriteVirtualServer" } },
+            { community: ["proxy-redirect-from", "proxy-redirect-to"], official: "ConfigMap or Annotation nginx.org/server-snippets", type: "configmap", category: "Rewrites", anchor: "rewrites", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-redirect-from": { key: "nginx.org/server-snippets", transform: "proxyRedirect" } } } },
             // SSL/TLS
-            { community: ["backend-protocol"], official: "Annotation nginx.org/ssl-services or nginx.org/grpc-services", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["force-ssl-redirect"], official: "Annotation nginx.org/redirect-to-https", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["ssl-ciphers"], official: "Annotation nginx.org/ssl-ciphers", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["ssl-prefer-server-ciphers"], official: "Annotation nginx.org/ssl-prefer-server-ciphers", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["ssl-redirect"], official: "Annotation nginx.org/redirect-to-https", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["ssl-passthrough"], official: "TransportServer CRD TLS_PASSTHROUGH", type: "transportserver", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["backend-protocol"], official: "Annotation nginx.org/ssl-services or nginx.org/grpc-services", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "backend-protocol": { key: "nginx.org/ssl-services", transform: "direct" } } } },
+            { community: ["force-ssl-redirect"], official: "Annotation nginx.org/redirect-to-https", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "force-ssl-redirect": { key: "nginx.org/redirect-to-https", transform: "direct" } } } },
+            { community: ["ssl-ciphers"], official: "Annotation nginx.org/ssl-ciphers", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "ssl-ciphers": { key: "nginx.org/ssl-ciphers", transform: "direct" } } } },
+            { community: ["ssl-prefer-server-ciphers"], official: "Annotation nginx.org/ssl-prefer-server-ciphers", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "ssl-prefer-server-ciphers": { key: "nginx.org/ssl-prefer-server-ciphers", transform: "direct" } } } },
+            { community: ["ssl-redirect"], official: "Annotation nginx.org/redirect-to-https", type: "annotation", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "ssl-redirect": { key: "nginx.org/redirect-to-https", transform: "direct" } } } },
+            { community: ["ssl-passthrough"], official: "TransportServer CRD TLS_PASSTHROUGH", type: "transportserver", category: "SSL/TLS", anchor: "ssl-tls", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { crdKind: "TransportServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_transportservers.yaml\nkubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_globalconfigurations.yaml", templateFn: "generateSSLPassthroughTransportServer" } },
             // Timeouts
-            { community: ["proxy-connect-timeout"], official: "Annotation nginx.org/proxy-connect-timeout", type: "annotation", category: "Timeouts", anchor: "timeouts", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-read-timeout"], official: "Annotation nginx.org/proxy-read-timeout", type: "annotation", category: "Timeouts", anchor: "timeouts", section: "oss", dualApproach: false, plusRequired: false },
-            { community: ["proxy-send-timeout"], official: "Annotation nginx.org/proxy-send-timeout", type: "annotation", category: "Timeouts", anchor: "timeouts", section: "oss", dualApproach: false, plusRequired: false },
+            { community: ["proxy-connect-timeout"], official: "Annotation nginx.org/proxy-connect-timeout", type: "annotation", category: "Timeouts", anchor: "timeouts", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-connect-timeout": { key: "nginx.org/proxy-connect-timeout", transform: "appendTimeUnit" } } } },
+            { community: ["proxy-read-timeout"], official: "Annotation nginx.org/proxy-read-timeout", type: "annotation", category: "Timeouts", anchor: "timeouts", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-read-timeout": { key: "nginx.org/proxy-read-timeout", transform: "appendTimeUnit" } } } },
+            { community: ["proxy-send-timeout"], official: "Annotation nginx.org/proxy-send-timeout", type: "annotation", category: "Timeouts", anchor: "timeouts", section: "oss", dualApproach: false, plusRequired: false,
+              officialMapping: { annotations: { "proxy-send-timeout": { key: "nginx.org/proxy-send-timeout", transform: "appendTimeUnit" } } } },
             // Plus: OIDC
-            { community: ["auth-cache-duration", "auth-cache-key", "auth-method", "auth-proxy-set-headers", "auth-request-redirect", "auth-response-headers", "auth-signin", "auth-signin-redirect-param", "auth-url"], official: "Policy CRD oidc", type: "policy", category: "OIDC Authentication", anchor: "oidc-authentication", section: "plus", dualApproach: false, plusRequired: true },
+            { community: ["auth-cache-duration", "auth-cache-key", "auth-method", "auth-proxy-set-headers", "auth-request-redirect", "auth-response-headers", "auth-signin", "auth-signin-redirect-param", "auth-url"], official: "Policy CRD oidc", type: "policy", category: "OIDC Authentication", anchor: "oidc-authentication", section: "plus", dualApproach: false, plusRequired: true,
+              officialMapping: { crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateOIDCPolicy" } },
             // Plus: Session Affinity
-            { community: ["affinity", "affinity-mode", "session-cookie-change-on-failure", "session-cookie-conditional-samesite-none", "session-cookie-domain", "session-cookie-expires", "session-cookie-max-age", "session-cookie-name", "session-cookie-path", "session-cookie-samesite", "session-cookie-secure"], official: "VirtualServer CRD sessionCookie", type: "virtualserver", category: "Session Affinity", anchor: "session-affinity", section: "plus", dualApproach: false, plusRequired: true },
+            { community: ["affinity", "affinity-mode", "session-cookie-change-on-failure", "session-cookie-conditional-samesite-none", "session-cookie-domain", "session-cookie-expires", "session-cookie-max-age", "session-cookie-name", "session-cookie-path", "session-cookie-samesite", "session-cookie-secure"], official: "VirtualServer CRD sessionCookie", type: "virtualserver", category: "Session Affinity", anchor: "session-affinity", section: "plus", dualApproach: false, plusRequired: true,
+              officialMapping: { crdKind: "VirtualServer", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_virtualservers.yaml", templateFn: "generateSessionAffinityVS" } },
             // Plus: WAF
-            { community: ["enable-modsecurity", "enable-owasp-core-rules", "modsecurity-snippet", "modsecurity-transaction-id"], official: "Policy CRD waf (NGINX App Protect)", type: "policy", category: "WAF", anchor: "waf", section: "plus", dualApproach: false, plusRequired: true }
+            { community: ["enable-modsecurity", "enable-owasp-core-rules", "modsecurity-snippet", "modsecurity-transaction-id"], official: "Policy CRD waf (NGINX App Protect)", type: "policy", category: "WAF", anchor: "waf", section: "plus", dualApproach: false, plusRequired: true,
+              officialMapping: { crdKind: "Policy", crdInstall: "kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4.0/deploy/crds/k8s.nginx.org_policies.yaml", templateFn: "generateWAFPolicy" } }
         ];
 
         const ANNOTATION_LOOKUP = new Map();
@@ -2108,6 +2354,322 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
             return d.innerHTML;
         }
 
+        var ANNOTATION_TIPS = {
+            'proxy-body-size': 'Max request body size for client uploads',
+            'proxy-buffer-size': 'Size of the buffer for reading proxy response headers',
+            'proxy-buffering': 'Enable/disable buffering of proxy responses',
+            'proxy-connect-timeout': 'Timeout for establishing a connection to the backend',
+            'proxy-read-timeout': 'Timeout for reading a response from the backend',
+            'proxy-send-timeout': 'Timeout for transmitting a request to the backend',
+            'proxy-request-buffering': 'Enable/disable buffering of client request body',
+            'proxy-next-upstream': 'Conditions to pass request to the next upstream server',
+            'proxy-next-upstream-timeout': 'Max time to wait while passing to next upstream',
+            'proxy-next-upstream-tries': 'Max retries for passing to next upstream',
+            'ssl-redirect': 'Redirect HTTP traffic to HTTPS',
+            'force-ssl-redirect': 'Force redirect to HTTPS even without TLS termination',
+            'rewrite-target': 'Rewrite the URL path before forwarding to backend',
+            'use-regex': 'Enable regex matching for path-based routing',
+            'limit-rps': 'Max requests per second from a single IP',
+            'limit-burst-multiplier': 'Multiplier for burst capacity on rate limits',
+            'whitelist-source-range': 'Allow traffic only from these IP ranges (CIDR)',
+            'denylist-source-range': 'Block traffic from these IP ranges (CIDR)',
+            'enable-cors': 'Enable CORS headers on responses',
+            'cors-allow-origin': 'Allowed origins for CORS requests',
+            'cors-allow-methods': 'Allowed HTTP methods for CORS requests',
+            'cors-allow-headers': 'Allowed headers in CORS requests',
+            'cors-allow-credentials': 'Allow credentials in CORS requests',
+            'cors-max-age': 'Max age (seconds) for CORS preflight cache',
+            'cors-expose-headers': 'Headers exposed to the browser in CORS responses',
+            'configuration-snippet': 'Custom NGINX config snippet injected into the location block',
+            'server-snippet': 'Custom NGINX config snippet injected into the server block',
+            'server-tokens': 'Show/hide NGINX version in error pages and headers',
+            'backend-protocol': 'Protocol used to communicate with the backend (HTTP/HTTPS/GRPC)',
+            'enable-access-log': 'Enable or disable access logging for this ingress',
+            'client-header-buffer-size': 'Size of buffer for reading client request headers',
+            'auth-tls-secret': 'Secret containing the CA certificate for client TLS verification',
+            'auth-tls-verify-client': 'Client certificate verification mode (on/off/optional)',
+            'auth-tls-verify-depth': 'Max depth of client certificate chain verification',
+            'proxy-ssl-secret': 'Secret containing the client certificate for upstream TLS',
+            'proxy-ssl-verify': 'Enable verification of the upstream server certificate',
+            'proxy-ssl-verify-depth': 'Max depth of upstream certificate chain verification',
+            'auth-type': 'Authentication type (basic)',
+            'auth-secret': 'Secret containing authentication credentials',
+            'auth-realm': 'Authentication realm shown in browser dialog',
+            'canary': 'Enable canary deployment for this ingress',
+            'canary-weight': 'Percentage of traffic routed to the canary backend',
+            'canary-by-header': 'Header name to route traffic to canary',
+            'canary-by-cookie': 'Cookie name to route traffic to canary',
+            'permanent-redirect': 'URL for permanent (301) redirect',
+            'permanent-redirect-code': 'HTTP status code for permanent redirects',
+            'temporal-redirect': 'URL for temporary (302) redirect',
+            'custom-http-errors': 'HTTP error codes to intercept and show custom error pages',
+            'default-backend': 'Default backend service for unmatched requests',
+            'ssl-passthrough': 'Pass TLS connections directly to the backend without termination',
+            'stream-snippet': 'Custom NGINX stream config snippet',
+            'upstream-vhost': 'Custom Host header sent to the upstream',
+            'x-forwarded-prefix': 'Set X-Forwarded-Prefix header for the upstream',
+            'custom-headers': 'ConfigMap containing custom response headers',
+            'upstream-hash-by': 'Hash key for consistent upstream load balancing',
+            'server-alias': 'Additional server names/aliases for this ingress',
+            'proxy-redirect-from': 'Source URL pattern for proxy redirect rewriting',
+            'proxy-redirect-to': 'Destination URL pattern for proxy redirect rewriting',
+            'modsecurity-snippet': 'ModSecurity WAF configuration snippet',
+            'modsecurity-transaction-id': 'Custom transaction ID for WAF audit logging',
+            'auth-url': 'URL for external authentication service',
+            'auth-signin': 'Sign-in URL for external authentication',
+            'session-cookie-name': 'Name of the session affinity cookie',
+            'session-cookie-expires': 'Expiration time for the session cookie',
+            'session-cookie-path': 'Path for the session cookie',
+            'session-cookie-secure': 'Mark session cookie as secure (HTTPS only)',
+            'session-cookie-samesite': 'SameSite attribute for session cookie'
+        };
+
+        function translateValue(value, transform, template) {
+            if (!value && value !== '0') return value;
+            switch (transform) {
+                case 'direct': return value;
+                case 'booleanInvert': return value === 'true' ? 'false' : value === 'false' ? 'true' : value;
+                case 'appendRateUnit': return /r\/[sm]$/.test(value) ? value : value + 'r/s';
+                case 'appendTimeUnit': return /[smhd]$/.test(value) ? value : value + 's';
+                case 'appendBufferSize': return /\s/.test(value) ? value : value + ' 8k';
+                case 'snippetWrap': return template ? template.replace('${value}', value) : value;
+                case 'corsSnippet': return value; // handled specially in generateMigrationYaml
+                case 'proxyRedirect': return value; // handled specially in generateMigrationYaml
+                default: return value;
+            }
+        }
+
+        function getAnnotationValue(foundAnnotations, name) {
+            var found = foundAnnotations.find(function(a) { return a.annotation === name; });
+            return found ? found.value : null;
+        }
+
+        var CRD_GENERATORS = {
+            generateAccessControlPolicy: function(found) {
+                var allow = getAnnotationValue(found, 'whitelist-source-range');
+                var deny = getAnnotationValue(found, 'denylist-source-range');
+                var lines = ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: access-control-policy', 'spec:', '  accessControl:'];
+                if (allow) {
+                    lines.push('    allow:');
+                    allow.split(',').forEach(function(ip) { lines.push('      - ' + ip.trim()); });
+                }
+                if (deny) {
+                    lines.push('    deny:');
+                    deny.split(',').forEach(function(ip) { lines.push('      - ' + ip.trim()); });
+                }
+                if (!allow && !deny) { lines.push('    allow:', '      - # TODO: Set your allowed CIDRs'); }
+                return lines.join('\n');
+            },
+            generateBasicAuthPolicy: function(found) {
+                var secret = getAnnotationValue(found, 'auth-secret') || '# TODO: Set your secret name';
+                var realm = getAnnotationValue(found, 'auth-realm') || 'Protected Area';
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: basic-auth-policy', 'spec:', '  basicAuth:', '    secret: ' + secret, '    realm: "' + realm + '"'].join('\n');
+            },
+            generateIngressMTLSPolicy: function(found) {
+                var secret = getAnnotationValue(found, 'auth-tls-secret');
+                var verify = getAnnotationValue(found, 'auth-tls-verify-client');
+                var depth = getAnnotationValue(found, 'auth-tls-verify-depth');
+                var secretVal = secret ? secret.replace(/^[^/]+\//, '') : '# TODO: Set your CA secret';
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: ingress-mtls-policy', 'spec:', '  ingressMTLS:', '    clientCertSecret: ' + secretVal, '    verifyClient: "' + (verify || 'on') + '"', '    verifyDepth: ' + (depth || '1')].join('\n');
+            },
+            generateEgressMTLSPolicy: function(found) {
+                var secret = getAnnotationValue(found, 'proxy-ssl-secret');
+                var verify = getAnnotationValue(found, 'proxy-ssl-verify');
+                var depth = getAnnotationValue(found, 'proxy-ssl-verify-depth');
+                var secretVal = secret ? secret.replace(/^[^/]+\//, '') : '# TODO: Set your client cert secret';
+                var lines = ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: egress-mtls-policy', 'spec:', '  egressMTLS:', '    tlsSecret: ' + secretVal, '    trustedCertSecret: # TODO: Set your CA cert secret'];
+                if (verify) lines.push('    verifyServer: ' + (verify === 'on' ? 'true' : 'false'));
+                if (depth) lines.push('    verifyDepth: ' + depth);
+                return lines.join('\n');
+            },
+            generateRateLimitPolicy: function(found) {
+                var rps = getAnnotationValue(found, 'limit-rps');
+                var burst = getAnnotationValue(found, 'limit-burst-multiplier');
+                var rate = rps ? rps + 'r/s' : '# TODO: Set your rate';
+                var burstVal = (rps && burst) ? String(parseInt(rps, 10) * parseInt(burst, 10)) : (burst || '5');
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: rate-limit-policy', 'spec:', '  rateLimit:', '    rate: ' + rate, '    burst: ' + burstVal, '    key: ${binary_remote_addr}', '    zoneSize: 10M', '    rejectCode: 429'].join('\n');
+            },
+            generateCanaryVirtualServer: function(found) {
+                var weight = getAnnotationValue(found, 'canary-weight') || '20';
+                var header = getAnnotationValue(found, 'canary-by-header');
+                var cookie = getAnnotationValue(found, 'canary-by-cookie');
+                var mainWeight = String(100 - parseInt(weight, 10));
+                var lines = ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: canary-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: main', '      service: # TODO: main service', '      port: 80', '    - name: canary', '      service: # TODO: canary service', '      port: 80', '  routes:', '    - path: /'];
+                if (header || cookie) {
+                    lines.push('      matches:');
+                    if (header) { lines.push('        - conditions:', '            - header: ' + header, '              value: "true"', '          action:', '            pass: canary'); }
+                    if (cookie) { lines.push('        - conditions:', '            - cookie: ' + cookie, '              value: "true"', '          action:', '            pass: canary'); }
+                }
+                lines.push('      splits:', '        - weight: ' + mainWeight, '          action: { pass: main }', '        - weight: ' + weight, '          action: { pass: canary }');
+                return lines.join('\n');
+            },
+            generateRedirectVirtualServer: function(found) {
+                var url = getAnnotationValue(found, 'permanent-redirect') || getAnnotationValue(found, 'temporal-redirect') || '# TODO: Set redirect URL';
+                var code = getAnnotationValue(found, 'permanent-redirect-code') || (getAnnotationValue(found, 'temporal-redirect') ? '302' : '301');
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: redirect-app', 'spec:', '  host: # TODO: Set your host', '  routes:', '    - path: /', '      action:', '        redirect:', '          url: ' + url + '${request_uri}', '          code: ' + code].join('\n');
+            },
+            generateRewriteVirtualServer: function(found) {
+                var target = getAnnotationValue(found, 'rewrite-target') || '/$2';
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: rewrite-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '  routes:', '    - path: ~ ^/api(/|$)(.*)', '      action:', '        proxy:', '          upstream: backend', '          rewritePath: ' + target].join('\n');
+            },
+            generateErrorPagesVirtualServer: function(found) {
+                var codes = getAnnotationValue(found, 'custom-http-errors') || '404,500,502';
+                var codeList = codes.split(',').map(function(c) { return c.trim(); });
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: error-pages-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '  routes:', '    - path: /', '      action:', '        pass: backend', '      errorPages:', '        - codes: [' + codeList.join(', ') + ']', '          return:', '            code: 503', '            body: "Service Unavailable"'].join('\n');
+            },
+            generateSSLPassthroughTransportServer: function(found) {
+                return ['# GlobalConfiguration (once per cluster)', 'apiVersion: k8s.nginx.org/v1', 'kind: GlobalConfiguration', 'metadata:', '  name: nginx-configuration', '  namespace: nginx-ingress', 'spec:', '  listeners:', '    - name: tls-passthrough', '      port: 443', '      protocol: TLS_PASSTHROUGH', '---', 'apiVersion: k8s.nginx.org/v1', 'kind: TransportServer', 'metadata:', '  name: ssl-passthrough-app', 'spec:', '  listener:', '    name: tls-passthrough', '    protocol: TLS_PASSTHROUGH', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 443', '  action:', '    pass: backend'].join('\n');
+            },
+            generateStreamSnippetTS: function(found) {
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: TransportServer', 'metadata:', '  name: stream-app', 'spec:', '  listener:', '    name: # TODO: Define in GlobalConfiguration', '    protocol: TCP', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: # TODO: Set port', '  action:', '    pass: backend'].join('\n');
+            },
+            generateCustomHeadersVS: function(found) {
+                var val = getAnnotationValue(found, 'custom-headers') || 'default/custom-headers-configmap';
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: custom-headers-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '  routes:', '    - path: /', '      action:', '        proxy:', '          upstream: backend', '          responseHeaders:', '            add:', '              - name: # TODO: Add your headers', '                value: # TODO: Set values', '  # Note: Migrating from ConfigMap ref: ' + val].join('\n');
+            },
+            generateRequestHeadersVS: function(found) {
+                var vhost = getAnnotationValue(found, 'upstream-vhost');
+                var prefix = getAnnotationValue(found, 'x-forwarded-prefix');
+                var headers = [];
+                if (vhost) headers.push('              - name: Host', '                value: "' + vhost + '"');
+                if (prefix) headers.push('              - name: X-Forwarded-Prefix', '                value: "' + prefix + '"');
+                if (headers.length === 0) headers.push('              - name: # TODO: Set header', '                value: # TODO: Set value');
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: headers-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '  routes:', '    - path: /', '      action:', '        proxy:', '          upstream: backend', '          requestHeaders:', '            set:'].concat(headers).join('\n');
+            },
+            generateHashLBVirtualServer: function(found) {
+                var hashBy = getAnnotationValue(found, 'upstream-hash-by') || '$request_uri';
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: hash-lb-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '      lb-method: "hash ' + hashBy + ' consistent"', '  routes:', '    - path: /', '      action:', '        pass: backend'].join('\n');
+            },
+            generateProxyNextUpstreamVS: function(found) {
+                var conditions = getAnnotationValue(found, 'proxy-next-upstream') || 'error timeout';
+                var timeout = getAnnotationValue(found, 'proxy-next-upstream-timeout');
+                var tries = getAnnotationValue(found, 'proxy-next-upstream-tries');
+                var lines = ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: proxy-upstream-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '      next-upstream: "' + conditions + '"'];
+                if (timeout) lines.push('      next-upstream-timeout: ' + (timeout.endsWith('s') ? timeout : timeout + 's'));
+                if (tries) lines.push('      next-upstream-tries: ' + tries);
+                lines.push('  routes:', '    - path: /', '      action:', '        pass: backend');
+                return lines.join('\n');
+            },
+            generateServerAliasVS: function(found) {
+                var alias = getAnnotationValue(found, 'server-alias') || 'alias.example.com';
+                return ['# Create a separate VirtualServer per host alias', 'apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: alias-app', 'spec:', '  host: ' + alias, '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '  routes:', '    - path: /', '      action:', '        pass: backend'].join('\n');
+            },
+            generateOIDCPolicy: function(found) {
+                var authUrl = getAnnotationValue(found, 'auth-url') || '# TODO: Set your auth endpoint';
+                var signinUrl = getAnnotationValue(found, 'auth-signin') || '# TODO: Set your sign-in URL';
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: oidc-policy', 'spec:', '  oidc:', '    clientID: # TODO: Set your client ID', '    clientSecret: # TODO: Create nginx.org/oidc secret', '    authEndpoint: "' + authUrl + '"', '    tokenEndpoint: # TODO: Set your token endpoint', '    jwksURI: # TODO: Set your JWKS URI', '    scope: "openid+profile+email"'].join('\n');
+            },
+            generateSessionAffinityVS: function(found) {
+                var name = getAnnotationValue(found, 'session-cookie-name') || 'SERVERID';
+                var expires = getAnnotationValue(found, 'session-cookie-expires');
+                var path = getAnnotationValue(found, 'session-cookie-path') || '/';
+                var secure = getAnnotationValue(found, 'session-cookie-secure');
+                var samesite = getAnnotationValue(found, 'session-cookie-samesite');
+                var lines = ['apiVersion: k8s.nginx.org/v1', 'kind: VirtualServer', 'metadata:', '  name: sticky-app', 'spec:', '  host: # TODO: Set your host', '  upstreams:', '    - name: backend', '      service: # TODO: Set your service', '      port: 80', '      sessionCookie:', '        enable: true', '        name: ' + name];
+                if (expires) {
+                    var secs = parseInt(expires, 10);
+                    var hours = Math.round(secs / 3600);
+                    lines.push('        expires: ' + (hours > 0 ? hours + 'h' : expires + 's'));
+                }
+                lines.push('        path: ' + path);
+                if (secure) lines.push('        secure: ' + secure);
+                lines.push('        httpOnly: true');
+                if (samesite) lines.push('        samesite: ' + samesite.toLowerCase());
+                lines.push('  routes:', '    - path: /', '      action:', '        pass: backend');
+                return lines.join('\n');
+            },
+            generateWAFPolicy: function(found) {
+                return ['apiVersion: k8s.nginx.org/v1', 'kind: Policy', 'metadata:', '  name: waf-policy', 'spec:', '  waf:', '    enable: true', '    apPolicy: "default/waf-policy"', '    securityLogs:', '      - enable: true', '        apLogConf: "default/log-config"', '        logDest: "syslog:server=syslog:514"'].join('\n');
+            }
+        };
+
+        function generateMigrationYaml(sorted) {
+            var annotationSwaps = [];
+            var configMapChanges = [];
+            var crdResources = [];
+
+            sorted.forEach(function(entry) {
+                var m = entry.mapping;
+                var om = m.officialMapping;
+                if (!om) return;
+
+                // Annotation swaps
+                if (om.annotations) {
+                    // Special handling for CORS — generate one combined snippet
+                    var hasCorsSnippet = Object.keys(om.annotations).some(function(k) { return om.annotations[k].transform === 'corsSnippet'; });
+                    if (hasCorsSnippet) {
+                        var corsOrigin = getAnnotationValue(entry.foundAnnotations, 'cors-allow-origin') || '*';
+                        var corsMethods = getAnnotationValue(entry.foundAnnotations, 'cors-allow-methods') || 'GET, POST, OPTIONS';
+                        var corsHeaders = getAnnotationValue(entry.foundAnnotations, 'cors-allow-headers') || 'DNT,User-Agent,X-Requested-With,Content-Type,Authorization';
+                        var corsCreds = getAnnotationValue(entry.foundAnnotations, 'cors-allow-credentials');
+                        var corsMaxAge = getAnnotationValue(entry.foundAnnotations, 'cors-max-age') || '86400';
+                        var corsExpose = getAnnotationValue(entry.foundAnnotations, 'cors-expose-headers');
+                        var snippetLines = [];
+                        snippetLines.push('add_header Access-Control-Allow-Origin "' + corsOrigin + '" always;');
+                        snippetLines.push('add_header Access-Control-Allow-Methods "' + corsMethods + '" always;');
+                        snippetLines.push('add_header Access-Control-Allow-Headers "' + corsHeaders + '" always;');
+                        if (corsCreds === 'true') snippetLines.push('add_header Access-Control-Allow-Credentials "true" always;');
+                        snippetLines.push('add_header Access-Control-Max-Age ' + corsMaxAge + ' always;');
+                        if (corsExpose) snippetLines.push('add_header Access-Control-Expose-Headers "' + corsExpose + '" always;');
+                        snippetLines.push('if ($request_method = OPTIONS) { return 204; }');
+                        var corsSnippetVal = snippetLines.join('\\n');
+                        annotationSwaps.push({ from: 'nginx.ingress.kubernetes.io/enable-cors + cors-*', to: 'nginx.org/server-snippets', value: '|\\n  ' + snippetLines.join('\\n  '), originalValue: 'true (+ cors-* values)', entry: entry });
+                    } else {
+                        // Special handling for proxy-redirect
+                        var hasProxyRedirect = Object.keys(om.annotations).some(function(k) { return om.annotations[k].transform === 'proxyRedirect'; });
+                        if (hasProxyRedirect) {
+                            var fromVal = getAnnotationValue(entry.foundAnnotations, 'proxy-redirect-from') || 'http://internal/';
+                            var toVal = getAnnotationValue(entry.foundAnnotations, 'proxy-redirect-to') || 'https://external/';
+                            annotationSwaps.push({ from: 'nginx.ingress.kubernetes.io/proxy-redirect-*', to: 'nginx.org/server-snippets', value: '|\\n  proxy_redirect ' + fromVal + ' ' + toVal + ';', originalValue: fromVal + ' -> ' + toVal, entry: entry });
+                        } else {
+                            entry.foundAnnotations.forEach(function(a) {
+                                var spec = om.annotations[a.annotation];
+                                if (spec) {
+                                    var translated = translateValue(a.value, spec.transform, spec.template);
+                                    annotationSwaps.push({ from: 'nginx.ingress.kubernetes.io/' + a.annotation, to: spec.key, value: translated, originalValue: a.value, entry: entry });
+                                }
+                            });
+                        }
+                    }
+                }
+
+                // ConfigMap changes
+                if (om.configMap) {
+                    entry.foundAnnotations.forEach(function(a) {
+                        var spec = om.configMap[a.annotation];
+                        if (spec) {
+                            var translated = translateValue(a.value, spec.transform, spec.template);
+                            configMapChanges.push({ from: 'nginx.ingress.kubernetes.io/' + a.annotation, to: spec.key, value: translated, originalValue: a.value, entry: entry });
+                        }
+                    });
+                }
+
+                // CRD resources
+                if (om.crdKind && om.templateFn && CRD_GENERATORS[om.templateFn]) {
+                    var yaml = CRD_GENERATORS[om.templateFn](entry.foundAnnotations);
+                    crdResources.push({ kind: om.crdKind, install: om.crdInstall, yaml: yaml, entry: entry });
+                }
+            });
+
+            return { annotationSwaps: annotationSwaps, configMapChanges: configMapChanges, crdResources: crdResources };
+        }
+
+        function copyAnalyzerBlock(btn) {
+            var pre = btn.parentElement;
+            var text = pre.getAttribute('data-raw') || pre.textContent.replace(/^Copy$|^Copied!$/m, '').trim();
+            navigator.clipboard.writeText(text).then(function() {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        }
+
+        function toggleAnalyzerDetails(btn) {
+            btn.classList.toggle('expanded');
+            var container = btn.nextElementSibling;
+            if (container) container.classList.toggle('visible');
+        }
+
         function analyzeYaml() {
             var yamlText = document.getElementById('yamlInput').value.trim();
             var resultsDiv = document.getElementById('analyzerResults');
@@ -2147,6 +2709,10 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
             });
             var crdCount = sorted.filter(function(e) { return e.mapping.type !== 'annotation' && e.mapping.type !== 'configmap'; }).length;
             renderAnalyzerResults(resultsDiv, annotations.length, sorted, crdCount, unrecognized);
+            // Smooth scroll to results
+            setTimeout(function() {
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         function showAnalyzerMessage(container, type, title, message) {
@@ -2160,96 +2726,562 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
             container.appendChild(div);
         }
 
+        function buildDetailCard(entry) {
+            var m = entry.mapping;
+            var badgeLabel = m.type === 'annotation' ? 'Annotation' : m.type === 'configmap' ? 'ConfigMap' : m.type.charAt(0).toUpperCase() + m.type.slice(1) + ' CRD';
+            var card = document.createElement('div');
+            card.className = 'analyzer-card type-' + m.type;
+            var header = document.createElement('div');
+            header.className = 'analyzer-card-header';
+            var foundDiv = document.createElement('div');
+            foundDiv.className = 'found-annotations';
+            entry.foundAnnotations.forEach(function(a) {
+                var code = document.createElement('code');
+                code.textContent = 'nginx.ingress.kubernetes.io/' + a.annotation;
+                if (ANNOTATION_TIPS[a.annotation]) {
+                    code.className = 'annotation-tooltip';
+                    code.setAttribute('data-tip', ANNOTATION_TIPS[a.annotation]);
+                }
+                foundDiv.appendChild(code);
+                if (a.value) {
+                    var valSpan = document.createElement('span');
+                    valSpan.className = 'annotation-value';
+                    valSpan.textContent = '= ' + a.value;
+                    foundDiv.appendChild(valSpan);
+                    foundDiv.appendChild(document.createTextNode(' '));
+                }
+            });
+            header.appendChild(foundDiv);
+            var badge = document.createElement('span');
+            badge.className = 'badge badge-' + m.type;
+            badge.textContent = badgeLabel;
+            header.appendChild(badge);
+            if (m.plusRequired) {
+                var plusSpan = document.createElement('span');
+                plusSpan.className = 'plus-indicator';
+                plusSpan.textContent = 'Plus Required';
+                header.appendChild(plusSpan);
+            }
+            card.appendChild(header);
+            var body = document.createElement('div');
+            body.className = 'analyzer-card-body';
+            var arrow = document.createElement('span');
+            arrow.className = 'migration-arrow';
+            arrow.textContent = '\u2192';
+            body.appendChild(arrow);
+            body.appendChild(document.createTextNode(' ' + m.official));
+            if (m.dualApproach) {
+                var em = document.createElement('em');
+                em.textContent = ' (dual approach: annotation or CRD)';
+                body.appendChild(em);
+            }
+            card.appendChild(body);
+            var footer = document.createElement('div');
+            footer.className = 'analyzer-card-footer';
+            var catLabel = document.createElement('span');
+            catLabel.className = 'category-label';
+            catLabel.textContent = m.category + ' (' + (m.section === 'oss' ? 'OSS' : 'Plus') + ')';
+            footer.appendChild(catLabel);
+            var link = document.createElement('a');
+            link.href = '#' + m.anchor;
+            link.textContent = 'View full migration example \u2192';
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                highlightSection(m.anchor);
+            });
+            footer.appendChild(link);
+            card.appendChild(footer);
+            return card;
+        }
+
+        function highlightYaml(text) {
+            var frag = document.createDocumentFragment();
+            var lines = text.split('\n');
+            lines.forEach(function(line, i) {
+                if (i > 0) frag.appendChild(document.createTextNode('\n'));
+                // Comment lines
+                var trimmed = line.trimStart();
+                if (trimmed.startsWith('#')) {
+                    var indent = document.createTextNode(line.substring(0, line.length - trimmed.length));
+                    frag.appendChild(indent);
+                    var commentSpan = document.createElement('span');
+                    commentSpan.className = 'yaml-comment';
+                    commentSpan.textContent = trimmed;
+                    frag.appendChild(commentSpan);
+                    return;
+                }
+                // Document separator
+                if (trimmed === '---') {
+                    var sepSpan = document.createElement('span');
+                    sepSpan.className = 'yaml-separator';
+                    sepSpan.textContent = line;
+                    frag.appendChild(sepSpan);
+                    return;
+                }
+                // Key: value pairs
+                var kvMatch = line.match(/^(\s*)([-]?\s*)([^:#\n]+?)(\s*:\s*)(.*)?$/);
+                if (kvMatch) {
+                    frag.appendChild(document.createTextNode(kvMatch[1]));
+                    if (kvMatch[2]) frag.appendChild(document.createTextNode(kvMatch[2]));
+                    var keySpan = document.createElement('span');
+                    keySpan.className = 'yaml-key';
+                    keySpan.textContent = kvMatch[3];
+                    frag.appendChild(keySpan);
+                    var colonSpan = document.createElement('span');
+                    colonSpan.className = 'yaml-separator';
+                    colonSpan.textContent = kvMatch[4];
+                    frag.appendChild(colonSpan);
+                    if (kvMatch[5] !== undefined && kvMatch[5] !== '') {
+                        var val = kvMatch[5];
+                        var valSpan = document.createElement('span');
+                        // Color-code specific value types
+                        if (/^(apiVersion|kind|metadata|spec|data)$/.test(kvMatch[3].trim())) {
+                            keySpan.className = 'yaml-keyword';
+                        }
+                        if (/^["']?(true|false|yes|no|on|off)["']?$/i.test(val.trim())) {
+                            valSpan.className = 'yaml-bool';
+                        } else if (/^["']?\d+(\.\d+)?[smhkMG]?["']?$/.test(val.trim())) {
+                            valSpan.className = 'yaml-number';
+                        } else if (val.trim().startsWith('#')) {
+                            valSpan.className = 'yaml-comment';
+                        } else {
+                            valSpan.className = 'yaml-value';
+                        }
+                        valSpan.textContent = val;
+                        frag.appendChild(valSpan);
+                    }
+                    return;
+                }
+                // List items (- value)
+                var listMatch = line.match(/^(\s*)(- )(.*)$/);
+                if (listMatch) {
+                    frag.appendChild(document.createTextNode(listMatch[1]));
+                    var dashSpan = document.createElement('span');
+                    dashSpan.className = 'yaml-separator';
+                    dashSpan.textContent = listMatch[2];
+                    frag.appendChild(dashSpan);
+                    var itemSpan = document.createElement('span');
+                    itemSpan.className = 'yaml-value';
+                    itemSpan.textContent = listMatch[3];
+                    frag.appendChild(itemSpan);
+                    return;
+                }
+                // Fallback
+                frag.appendChild(document.createTextNode(line));
+            });
+            return frag;
+        }
+
+        function buildYamlBlock(text, collapsible) {
+            var pre = document.createElement('div');
+            pre.className = 'analyzer-yaml-output';
+            var copyBtn = document.createElement('button');
+            copyBtn.className = 'analyzer-copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.addEventListener('click', function() { copyAnalyzerBlock(copyBtn); });
+            pre.appendChild(copyBtn);
+            pre.appendChild(highlightYaml(text));
+            pre.setAttribute('data-raw', text);
+            var lineCount = text.split('\n').length;
+            if (collapsible && lineCount > 12) {
+                pre.classList.add('collapsed');
+                var wrapper = document.createDocumentFragment();
+                wrapper.appendChild(pre);
+                var expandBtn = document.createElement('button');
+                expandBtn.className = 'analyzer-yaml-expand';
+                expandBtn.textContent = 'Show full YAML (' + lineCount + ' lines)';
+                expandBtn.addEventListener('click', function() {
+                    if (pre.classList.contains('collapsed')) {
+                        pre.classList.remove('collapsed');
+                        expandBtn.textContent = 'Collapse';
+                    } else {
+                        pre.classList.add('collapsed');
+                        expandBtn.textContent = 'Show full YAML (' + lineCount + ' lines)';
+                    }
+                });
+                wrapper.appendChild(expandBtn);
+                return wrapper;
+            }
+            return pre;
+        }
+
+        function buildDiffYamlBlock(text, diffType) {
+            // diffType: 'removed' or 'added' — highlights annotation lines (skips the first 'annotations:' line)
+            var pre = document.createElement('div');
+            pre.className = 'analyzer-yaml-output';
+            var copyBtn = document.createElement('button');
+            copyBtn.className = 'analyzer-copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.addEventListener('click', function() { copyAnalyzerBlock(copyBtn); });
+            pre.appendChild(copyBtn);
+            var lines = text.split('\n');
+            lines.forEach(function(line, i) {
+                if (i > 0) pre.appendChild(document.createTextNode('\n'));
+                var isAnnotationLine = i > 0 && line.match(/^\s+\S/);
+                if (isAnnotationLine) {
+                    var wrapper = document.createElement('span');
+                    wrapper.className = 'yaml-diff-line ' + diffType;
+                    var frag = highlightYaml(line);
+                    wrapper.appendChild(frag);
+                    pre.appendChild(wrapper);
+                } else {
+                    pre.appendChild(highlightYaml(line));
+                }
+            });
+            pre.setAttribute('data-raw', text);
+            return pre;
+        }
+
+        function buildInstallBlock(installCmd) {
+            var div = document.createElement('div');
+            div.className = 'analyzer-install-cmd';
+            div.setAttribute('data-raw', installCmd);
+            var copyBtn = document.createElement('button');
+            copyBtn.className = 'analyzer-copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.addEventListener('click', function() { copyAnalyzerBlock(copyBtn); });
+            div.appendChild(copyBtn);
+            var code = document.createElement('span');
+            code.textContent = installCmd;
+            div.appendChild(code);
+            return div;
+        }
+
+        function buildDetailsToggle(entries) {
+            var btn = document.createElement('button');
+            btn.className = 'analyzer-details-toggle';
+            btn.textContent = 'Show details (' + entries.length + ' mapping' + (entries.length !== 1 ? 's' : '') + ')';
+            btn.addEventListener('click', function() { toggleAnalyzerDetails(btn); });
+            var container = document.createElement('div');
+            container.className = 'analyzer-details-container';
+            entries.forEach(function(e) {
+                container.appendChild(buildDetailCard(e));
+            });
+            var wrapper = document.createDocumentFragment();
+            wrapper.appendChild(btn);
+            wrapper.appendChild(container);
+            return wrapper;
+        }
+
         function renderAnalyzerResults(container, totalAnnotations, sorted, crdCount, unrecognized) {
             container.textContent = '';
+            var migration = generateMigrationYaml(sorted);
+
             // Summary pills
             var summary = document.createElement('div');
             summary.className = 'analyzer-summary';
-            function addPill(cls, text) {
+            function addPill(cls, text, scrollTarget) {
                 var span = document.createElement('span');
                 span.className = 'analyzer-pill ' + cls;
                 span.textContent = text;
+                if (scrollTarget) {
+                    span.setAttribute('data-scroll', scrollTarget);
+                    span.setAttribute('title', 'Click to jump to this section');
+                    span.addEventListener('click', function() {
+                        var el = document.getElementById(scrollTarget);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                }
                 summary.appendChild(span);
             }
             addPill('found', totalAnnotations + ' annotation' + (totalAnnotations !== 1 ? 's' : '') + ' found');
-            addPill('paths', sorted.length + ' migration path' + (sorted.length !== 1 ? 's' : ''));
-            if (crdCount > 0) addPill('crds', crdCount + ' require CRDs');
-            if (unrecognized.length > 0) addPill('unrecognized', unrecognized.length + ' unrecognized');
+            addPill('paths', sorted.length + ' migration path' + (sorted.length !== 1 ? 's' : ''), migration.annotationSwaps.length > 0 ? 'analyzer-step-1' : null);
+            if (crdCount > 0) addPill('crds', crdCount + ' require CRDs', 'analyzer-step-3');
+            if (unrecognized.length > 0) addPill('unrecognized', unrecognized.length + ' unrecognized', 'analyzer-unrecognized');
             container.appendChild(summary);
-            // Cards
-            var cardsDiv = document.createElement('div');
-            cardsDiv.id = 'analyzerCards';
-            sorted.forEach(function(entry) {
-                var m = entry.mapping;
-                var badgeLabel = m.type === 'annotation' ? 'Annotation' : m.type === 'configmap' ? 'ConfigMap' : m.type.charAt(0).toUpperCase() + m.type.slice(1) + ' CRD';
-                var card = document.createElement('div');
-                card.className = 'analyzer-card type-' + m.type;
-                // Header
-                var header = document.createElement('div');
-                header.className = 'analyzer-card-header';
-                var foundDiv = document.createElement('div');
-                foundDiv.className = 'found-annotations';
-                entry.foundAnnotations.forEach(function(a) {
-                    var code = document.createElement('code');
-                    code.textContent = 'nginx.ingress.kubernetes.io/' + a.annotation;
-                    foundDiv.appendChild(code);
-                    if (a.value) {
-                        var valSpan = document.createElement('span');
-                        valSpan.className = 'annotation-value';
-                        valSpan.textContent = '= ' + a.value;
-                        foundDiv.appendChild(valSpan);
-                        foundDiv.appendChild(document.createTextNode(' '));
+
+            var animDelay = 0;
+            function applyFadeIn(el) {
+                el.classList.add('analyzer-fade-in');
+                el.style.animationDelay = animDelay + 'ms';
+                animDelay += 100;
+            }
+            applyFadeIn(summary);
+
+            // Success banner
+            var banner = document.createElement('div');
+            banner.className = 'analyzer-success-banner';
+            var svgNS = 'http://www.w3.org/2000/svg';
+            var checkSvg = document.createElementNS(svgNS, 'svg');
+            checkSvg.setAttribute('width', '22'); checkSvg.setAttribute('height', '22');
+            checkSvg.setAttribute('viewBox', '0 0 24 24'); checkSvg.setAttribute('fill', 'none');
+            checkSvg.setAttribute('stroke', 'currentColor'); checkSvg.setAttribute('stroke-width', '2.5');
+            var checkPath = document.createElementNS(svgNS, 'path');
+            checkPath.setAttribute('d', 'M22 11.08V12a10 10 0 1 1-5.93-9.14');
+            var checkLine = document.createElementNS(svgNS, 'polyline');
+            checkLine.setAttribute('points', '22 4 12 14.01 9 11.01');
+            checkSvg.appendChild(checkPath); checkSvg.appendChild(checkLine);
+            banner.appendChild(checkSvg);
+            var bannerText = document.createElement('div');
+            bannerText.className = 'banner-text';
+            var stepCount = (migration.annotationSwaps.length > 0 ? 1 : 0) + (migration.configMapChanges.length > 0 ? 1 : 0) + (migration.crdResources.length > 0 ? 1 : 0);
+            bannerText.textContent = 'Analysis complete \u2014 ';
+            var bannerStrong = document.createElement('strong');
+            bannerStrong.textContent = totalAnnotations + ' annotations analyzed';
+            bannerText.appendChild(bannerStrong);
+            bannerText.appendChild(document.createTextNode(', ' + sorted.length + ' migration paths across ' + stepCount + ' step' + (stepCount !== 1 ? 's' : '') + '.'));
+            banner.appendChild(bannerText);
+
+            // Complexity indicator
+            var complexityLevel = crdCount > 0 ? 'advanced' : (migration.configMapChanges.length > 0 ? 'moderate' : 'simple');
+            var complexityLabels = { simple: 'Simple Migration', moderate: 'Moderate Migration', advanced: 'Advanced Migration' };
+            var complexityFilled = { simple: 1, moderate: 2, advanced: 3 };
+            var complexBadge = document.createElement('span');
+            complexBadge.className = 'analyzer-complexity ' + complexityLevel;
+            var dotsDiv = document.createElement('span');
+            dotsDiv.className = 'analyzer-complexity-dots';
+            for (var ci = 0; ci < 3; ci++) {
+                var dot = document.createElement('span');
+                if (ci < complexityFilled[complexityLevel]) dot.className = 'filled';
+                dotsDiv.appendChild(dot);
+            }
+            complexBadge.appendChild(dotsDiv);
+            complexBadge.appendChild(document.createTextNode(complexityLabels[complexityLevel]));
+            banner.appendChild(complexBadge);
+            applyFadeIn(banner);
+            container.appendChild(banner);
+
+            var stepNum = 0;
+
+            // Step 1: Annotation Swaps
+            if (migration.annotationSwaps.length > 0) {
+                stepNum++;
+                var step1 = document.createElement('div');
+                step1.className = 'analyzer-step';
+                step1.id = 'analyzer-step-1';
+                var h1 = document.createElement('div');
+                h1.className = 'analyzer-step-header';
+                var n1 = document.createElement('div');
+                n1.className = 'analyzer-step-number';
+                n1.textContent = String(stepNum);
+                var t1 = document.createElement('div');
+                t1.className = 'analyzer-step-title';
+                t1.textContent = 'Swap Annotations';
+                var c1 = document.createElement('span');
+                c1.className = 'analyzer-step-count';
+                c1.textContent = migration.annotationSwaps.length + ' annotation' + (migration.annotationSwaps.length !== 1 ? 's' : '');
+                h1.appendChild(n1);
+                h1.appendChild(t1);
+                h1.appendChild(c1);
+                step1.appendChild(h1);
+                var d1 = document.createElement('div');
+                d1.className = 'analyzer-step-desc';
+                d1.textContent = 'Replace community annotations with their Official NGINX equivalents. Copy this annotations block into your Ingress metadata.';
+                step1.appendChild(d1);
+
+                var oldLines = ['annotations:'];
+                var newLines = ['annotations:'];
+                var seenEntries = new Map();
+                // Sort by category for grouped output
+                var swapsByCategory = {};
+                migration.annotationSwaps.forEach(function(swap) {
+                    var cat = swap.entry.mapping.category;
+                    if (!swapsByCategory[cat]) swapsByCategory[cat] = [];
+                    swapsByCategory[cat].push(swap);
+                });
+                var categoryKeys = Object.keys(swapsByCategory).sort();
+                var multiCategory = categoryKeys.length > 1;
+                categoryKeys.forEach(function(cat) {
+                    if (multiCategory) {
+                        oldLines.push('  # ' + cat);
+                        newLines.push('  # ' + cat);
                     }
+                    swapsByCategory[cat].forEach(function(swap) {
+                        oldLines.push('  ' + swap.from + ': "' + (swap.originalValue || swap.value) + '"');
+                        newLines.push('  ' + swap.to + ': "' + swap.value + '"');
+                        if (!seenEntries.has(swap.entry)) seenEntries.set(swap.entry, swap.entry);
+                    });
                 });
-                header.appendChild(foundDiv);
-                var badge = document.createElement('span');
-                badge.className = 'badge badge-' + m.type;
-                badge.textContent = badgeLabel;
-                header.appendChild(badge);
-                if (m.plusRequired) {
-                    var plusSpan = document.createElement('span');
-                    plusSpan.className = 'plus-indicator';
-                    plusSpan.textContent = 'Plus Required';
-                    header.appendChild(plusSpan);
+
+                // Side-by-side comparison
+                var comp = document.createElement('div');
+                comp.className = 'analyzer-comparison';
+                var oldBlock = document.createElement('div');
+                oldBlock.className = 'analyzer-comparison-block old';
+                var oldH5 = document.createElement('h5');
+                oldH5.textContent = 'Community NGINX Ingress (current)';
+                oldBlock.appendChild(oldH5);
+                oldBlock.appendChild(buildDiffYamlBlock(oldLines.join('\n'), 'removed'));
+                var newBlock = document.createElement('div');
+                newBlock.className = 'analyzer-comparison-block new';
+                var newH5 = document.createElement('h5');
+                newH5.textContent = 'Official NGINX Ingress (migrated)';
+                newBlock.appendChild(newH5);
+                newBlock.appendChild(buildDiffYamlBlock(newLines.join('\n'), 'added'));
+                comp.appendChild(oldBlock);
+                comp.appendChild(newBlock);
+                step1.appendChild(comp);
+
+                // Dual-approach note
+                var dualEntries = Array.from(seenEntries.values()).filter(function(e) { return e.mapping.dualApproach; });
+                if (dualEntries.length > 0) {
+                    var dualNote = document.createElement('div');
+                    dualNote.className = 'analyzer-dual-note';
+                    dualNote.textContent = 'Some annotations above also have a CRD-based approach shown in Step ' + (migration.crdResources.length > 0 ? '3' : 'N/A') + ' below.';
+                    step1.appendChild(dualNote);
                 }
-                card.appendChild(header);
-                // Body
-                var body = document.createElement('div');
-                body.className = 'analyzer-card-body';
-                var arrow = document.createElement('span');
-                arrow.className = 'migration-arrow';
-                arrow.textContent = '\u2192';
-                body.appendChild(arrow);
-                body.appendChild(document.createTextNode(' ' + m.official));
-                if (m.dualApproach) {
-                    var em = document.createElement('em');
-                    em.textContent = ' (dual approach: annotation or CRD)';
-                    body.appendChild(em);
-                }
-                card.appendChild(body);
-                // Footer
-                var footer = document.createElement('div');
-                footer.className = 'analyzer-card-footer';
-                var catLabel = document.createElement('span');
-                catLabel.className = 'category-label';
-                catLabel.textContent = m.category + ' (' + (m.section === 'oss' ? 'OSS' : 'Plus') + ')';
-                footer.appendChild(catLabel);
-                var link = document.createElement('a');
-                link.href = '#' + m.anchor;
-                link.textContent = 'View full migration example \u2192';
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    highlightSection(m.anchor);
+
+                step1.appendChild(buildDetailsToggle(Array.from(seenEntries.values())));
+                applyFadeIn(step1);
+                container.appendChild(step1);
+            }
+
+            // Step 2: ConfigMap Changes
+            if (migration.configMapChanges.length > 0) {
+                stepNum++;
+                var step2 = document.createElement('div');
+                step2.className = 'analyzer-step';
+                step2.id = 'analyzer-step-2';
+                var h2 = document.createElement('div');
+                h2.className = 'analyzer-step-header';
+                var n2 = document.createElement('div');
+                n2.className = 'analyzer-step-number';
+                n2.textContent = String(stepNum);
+                var t2 = document.createElement('div');
+                t2.className = 'analyzer-step-title';
+                t2.textContent = 'ConfigMap Changes';
+                var c2 = document.createElement('span');
+                c2.className = 'analyzer-step-count configmap';
+                c2.textContent = migration.configMapChanges.length + ' entr' + (migration.configMapChanges.length !== 1 ? 'ies' : 'y');
+                h2.appendChild(n2);
+                h2.appendChild(t2);
+                h2.appendChild(c2);
+                step2.appendChild(h2);
+                var d2 = document.createElement('div');
+                d2.className = 'analyzer-step-desc';
+                d2.textContent = 'These settings are configured via the NGINX ConfigMap instead of annotations. Update your nginx-config ConfigMap with these entries.';
+                step2.appendChild(d2);
+
+                var cmOldLines = ['# Annotations to remove:'];
+                var cmLines = ['apiVersion: v1', 'kind: ConfigMap', 'metadata:', '  name: nginx-config', 'data:'];
+                var cmEntries = new Map();
+                migration.configMapChanges.forEach(function(change) {
+                    cmOldLines.push(change.from + ': "' + (change.originalValue || change.value) + '"');
+                    cmLines.push('  ' + change.to + ': "' + change.value + '"');
+                    if (!cmEntries.has(change.entry)) cmEntries.set(change.entry, change.entry);
                 });
-                footer.appendChild(link);
-                card.appendChild(footer);
-                cardsDiv.appendChild(card);
-            });
-            container.appendChild(cardsDiv);
+
+                // Side-by-side comparison for ConfigMap
+                var cmComp = document.createElement('div');
+                cmComp.className = 'analyzer-comparison';
+                var cmOldBlock = document.createElement('div');
+                cmOldBlock.className = 'analyzer-comparison-block old';
+                var cmOldH5 = document.createElement('h5');
+                cmOldH5.textContent = 'Annotations (remove these)';
+                cmOldBlock.appendChild(cmOldH5);
+                cmOldBlock.appendChild(buildDiffYamlBlock(cmOldLines.join('\n'), 'removed'));
+                var cmNewBlock = document.createElement('div');
+                cmNewBlock.className = 'analyzer-comparison-block new';
+                var cmNewH5 = document.createElement('h5');
+                cmNewH5.textContent = 'ConfigMap entries (add these)';
+                cmNewBlock.appendChild(cmNewH5);
+                cmNewBlock.appendChild(buildYamlBlock(cmLines.join('\n')));
+                cmComp.appendChild(cmOldBlock);
+                cmComp.appendChild(cmNewBlock);
+                step2.appendChild(cmComp);
+                step2.appendChild(buildDetailsToggle(Array.from(cmEntries.values())));
+                applyFadeIn(step2);
+                container.appendChild(step2);
+            }
+
+            // Step 3: CRD Resources
+            if (migration.crdResources.length > 0) {
+                stepNum++;
+                var step3 = document.createElement('div');
+                step3.className = 'analyzer-step';
+                step3.id = 'analyzer-step-3';
+                var h3 = document.createElement('div');
+                h3.className = 'analyzer-step-header';
+                var n3 = document.createElement('div');
+                n3.className = 'analyzer-step-number';
+                n3.textContent = String(stepNum);
+                var t3 = document.createElement('div');
+                t3.className = 'analyzer-step-title';
+                t3.textContent = 'CRD Resources';
+                var c3 = document.createElement('span');
+                c3.className = 'analyzer-step-count crd';
+                c3.textContent = migration.crdResources.length + ' resource' + (migration.crdResources.length !== 1 ? 's' : '');
+                h3.appendChild(n3);
+                h3.appendChild(t3);
+                h3.appendChild(c3);
+                step3.appendChild(h3);
+                var d3 = document.createElement('div');
+                d3.className = 'analyzer-step-desc';
+                d3.textContent = 'These features require Custom Resource Definitions. Install the CRDs first, then apply the generated resources.';
+                step3.appendChild(d3);
+
+                // Group by CRD kind
+                var crdGroups = {};
+                migration.crdResources.forEach(function(res) {
+                    if (!crdGroups[res.kind]) crdGroups[res.kind] = [];
+                    crdGroups[res.kind].push(res);
+                });
+
+                // Deduplicate install commands across all groups
+                var seenInstalls = new Set();
+                var allInstalls = [];
+                Object.keys(crdGroups).forEach(function(kind) {
+                    crdGroups[kind].forEach(function(res) {
+                        if (res.install && !seenInstalls.has(res.install)) {
+                            seenInstalls.add(res.install);
+                            allInstalls.push(res.install);
+                        }
+                    });
+                });
+                if (allInstalls.length > 0) {
+                    var installLabel = document.createElement('div');
+                    installLabel.style.cssText = 'font-size:0.85rem;font-weight:600;color:#666;margin-bottom:4px;';
+                    installLabel.textContent = 'Install required CRDs:';
+                    step3.appendChild(installLabel);
+                    step3.appendChild(buildInstallBlock(allInstalls.join('\n')));
+                }
+
+                Object.keys(crdGroups).forEach(function(kind) {
+                    var group = crdGroups[kind];
+                    var groupDiv = document.createElement('div');
+                    groupDiv.className = 'analyzer-crd-group';
+                    var groupTitle = document.createElement('div');
+                    groupTitle.className = 'analyzer-crd-group-title';
+                    // Map CRD kind to badge class
+                    var kindBadgeMap = { 'Policy': 'policy', 'VirtualServer': 'virtualserver', 'VirtualServerRoute': 'virtualserverroute', 'TransportServer': 'transportserver', 'GlobalConfiguration': 'globalconfiguration' };
+                    var badgeClass = kindBadgeMap[kind] || 'virtualserver';
+                    var kindBadge = document.createElement('span');
+                    kindBadge.className = 'badge badge-' + badgeClass;
+                    kindBadge.style.marginRight = '8px';
+                    kindBadge.textContent = kind + ' CRD';
+                    groupTitle.appendChild(kindBadge);
+                    groupTitle.appendChild(document.createTextNode(group.length + ' resource' + (group.length !== 1 ? 's' : '')));
+                    groupDiv.appendChild(groupTitle);
+
+                    group.forEach(function(res, idx) {
+                        if (idx > 0) {
+                            var spacer = document.createElement('hr');
+                            spacer.className = 'analyzer-step-separator';
+                            groupDiv.appendChild(spacer);
+                        }
+                        var catLabel = document.createElement('div');
+                        catLabel.style.cssText = 'font-size:0.82rem;color:#888;margin-bottom:4px;';
+                        catLabel.textContent = res.entry.mapping.category;
+                        if (res.entry.mapping.plusRequired) catLabel.textContent += ' (Plus Required)';
+                        if (res.entry.mapping.dualApproach) catLabel.textContent += ' — CRD Approach';
+                        groupDiv.appendChild(catLabel);
+                        groupDiv.appendChild(buildYamlBlock(res.yaml, true));
+                    });
+
+                    var crdEntries = group.map(function(r) { return r.entry; });
+                    groupDiv.appendChild(buildDetailsToggle(crdEntries));
+                    step3.appendChild(groupDiv);
+                });
+
+                applyFadeIn(step3);
+                container.appendChild(step3);
+            }
+
             // Unrecognized
             if (unrecognized.length > 0) {
                 var unrecSection = document.createElement('div');
                 unrecSection.className = 'analyzer-unrecognized-section';
+                unrecSection.id = 'analyzer-unrecognized';
                 var h4 = document.createElement('h4');
                 h4.textContent = 'Unrecognized Annotations';
                 unrecSection.appendChild(h4);
@@ -2268,6 +3300,10 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
                     uFound.className = 'found-annotations';
                     var uCode = document.createElement('code');
                     uCode.textContent = 'nginx.ingress.kubernetes.io/' + u.annotation;
+                    if (ANNOTATION_TIPS[u.annotation]) {
+                        uCode.className = 'annotation-tooltip';
+                        uCode.setAttribute('data-tip', ANNOTATION_TIPS[u.annotation]);
+                    }
                     uFound.appendChild(uCode);
                     if (u.value) {
                         var uVal = document.createElement('span');
@@ -2289,13 +3325,197 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
                 contributeLink.textContent = 'Contribute a mapping on GitHub \u2192';
                 contributeP.appendChild(contributeLink);
                 unrecSection.appendChild(contributeP);
+                applyFadeIn(unrecSection);
                 container.appendChild(unrecSection);
+            }
+
+            // Export actions (Copy All + Download)
+            if (migration.annotationSwaps.length > 0 || migration.configMapChanges.length > 0 || migration.crdResources.length > 0) {
+                var allYamlParts = [];
+                if (migration.annotationSwaps.length > 0) {
+                    var swapLines = ['# Step 1: Annotation Swaps', 'annotations:'];
+                    var copySwapsByCat = {};
+                    migration.annotationSwaps.forEach(function(s) {
+                        var cat = s.entry.mapping.category;
+                        if (!copySwapsByCat[cat]) copySwapsByCat[cat] = [];
+                        copySwapsByCat[cat].push(s);
+                    });
+                    var copyCatKeys = Object.keys(copySwapsByCat).sort();
+                    copyCatKeys.forEach(function(cat) {
+                        if (copyCatKeys.length > 1) swapLines.push('  # ' + cat);
+                        copySwapsByCat[cat].forEach(function(s) { swapLines.push('  ' + s.to + ': "' + s.value + '"'); });
+                    });
+                    allYamlParts.push(swapLines.join('\n'));
+                }
+                if (migration.configMapChanges.length > 0) {
+                    var cmParts = ['# Step 2: ConfigMap Changes', 'apiVersion: v1', 'kind: ConfigMap', 'metadata:', '  name: nginx-config', 'data:'];
+                    migration.configMapChanges.forEach(function(c) { cmParts.push('  ' + c.to + ': "' + c.value + '"'); });
+                    allYamlParts.push(cmParts.join('\n'));
+                }
+                if (migration.crdResources.length > 0) {
+                    migration.crdResources.forEach(function(r) {
+                        allYamlParts.push('# Step 3: ' + r.entry.mapping.category + ' (' + r.kind + ')\n' + r.yaml);
+                    });
+                }
+                var allYaml = allYamlParts.join('\n---\n');
+                var exportRow = document.createElement('div');
+                exportRow.className = 'analyzer-export-actions';
+                var copyAllBtn = document.createElement('button');
+                copyAllBtn.className = 'analyzer-copy-all';
+                copyAllBtn.style.marginTop = '0';
+                var svgNS = 'http://www.w3.org/2000/svg';
+                var clipSvg = document.createElementNS(svgNS, 'svg');
+                clipSvg.setAttribute('width', '18');
+                clipSvg.setAttribute('height', '18');
+                clipSvg.setAttribute('viewBox', '0 0 24 24');
+                clipSvg.setAttribute('fill', 'none');
+                clipSvg.setAttribute('stroke', 'currentColor');
+                clipSvg.setAttribute('stroke-width', '2');
+                var rect1 = document.createElementNS(svgNS, 'rect');
+                rect1.setAttribute('x', '9'); rect1.setAttribute('y', '9');
+                rect1.setAttribute('width', '13'); rect1.setAttribute('height', '13');
+                rect1.setAttribute('rx', '2'); rect1.setAttribute('ry', '2');
+                var path1 = document.createElementNS(svgNS, 'path');
+                path1.setAttribute('d', 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1');
+                clipSvg.appendChild(rect1);
+                clipSvg.appendChild(path1);
+                copyAllBtn.appendChild(clipSvg);
+                copyAllBtn.appendChild(document.createTextNode('Copy All Migration YAML'));
+                copyAllBtn.addEventListener('click', function() {
+                    navigator.clipboard.writeText(allYaml).then(function() {
+                        copyAllBtn.textContent = '';
+                        copyAllBtn.appendChild(clipSvg);
+                        copyAllBtn.appendChild(document.createTextNode('Copied!'));
+                        copyAllBtn.classList.add('copied');
+                        setTimeout(function() {
+                            copyAllBtn.textContent = '';
+                            copyAllBtn.appendChild(clipSvg);
+                            copyAllBtn.appendChild(document.createTextNode('Copy All Migration YAML'));
+                            copyAllBtn.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+                exportRow.appendChild(copyAllBtn);
+
+                // Download YAML button
+                var dlBtn = document.createElement('button');
+                dlBtn.className = 'analyzer-download-btn';
+                var dlSvg = document.createElementNS(svgNS, 'svg');
+                dlSvg.setAttribute('width', '18'); dlSvg.setAttribute('height', '18');
+                dlSvg.setAttribute('viewBox', '0 0 24 24'); dlSvg.setAttribute('fill', 'none');
+                dlSvg.setAttribute('stroke', 'currentColor'); dlSvg.setAttribute('stroke-width', '2');
+                var dlPath1 = document.createElementNS(svgNS, 'path');
+                dlPath1.setAttribute('d', 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4');
+                var dlPath2 = document.createElementNS(svgNS, 'polyline');
+                dlPath2.setAttribute('points', '7 10 12 15 17 10');
+                var dlPath3 = document.createElementNS(svgNS, 'line');
+                dlPath3.setAttribute('x1', '12'); dlPath3.setAttribute('y1', '15');
+                dlPath3.setAttribute('x2', '12'); dlPath3.setAttribute('y2', '3');
+                dlSvg.appendChild(dlPath1); dlSvg.appendChild(dlPath2); dlSvg.appendChild(dlPath3);
+                dlBtn.appendChild(dlSvg);
+                dlBtn.appendChild(document.createTextNode('Download YAML'));
+                dlBtn.addEventListener('click', function() {
+                    var header = '# NGINX Ingress Migration Guide — Generated Output\n# https://alessfg.github.io/nginx-ingress-migration-guide/\n# Generated: ' + new Date().toISOString().split('T')[0] + '\n\n';
+                    var blob = new Blob([header + allYaml], { type: 'application/x-yaml' });
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'nginx-ingress-migration.yaml';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    dlBtn.classList.add('downloaded');
+                    var origText = dlBtn.lastChild;
+                    origText.textContent = 'Downloaded!';
+                    setTimeout(function() {
+                        origText.textContent = 'Download YAML';
+                        dlBtn.classList.remove('downloaded');
+                    }, 2000);
+                });
+                exportRow.appendChild(dlBtn);
+                container.appendChild(exportRow);
+            }
+
+            updateNavBadge(totalAnnotations);
+
+            // What's Next? section
+            if (sorted.length > 0) {
+                var nextBox = document.createElement('div');
+                nextBox.className = 'analyzer-next-steps';
+                var nextH4 = document.createElement('h4');
+                nextH4.textContent = "What's Next?";
+                nextBox.appendChild(nextH4);
+                var nextUl = document.createElement('ul');
+                var nextItems = [
+                    { text: 'Review the full Migration Checklist', anchor: '#checklist' },
+                    { text: 'Browse all OSS annotation mappings', anchor: '#oss-mappings' }
+                ];
+                if (crdCount > 0) nextItems.push({ text: 'Install the required CRDs', anchor: '#installation' });
+                nextItems.push({ text: 'Check the Official NGINX Ingress Controller docs', href: 'https://docs.nginx.com/nginx-ingress-controller/', external: true });
+                nextItems.forEach(function(item) {
+                    var li = document.createElement('li');
+                    var a = document.createElement('a');
+                    if (item.external) {
+                        a.href = item.href;
+                        a.target = '_blank';
+                    } else {
+                        a.href = item.anchor;
+                        a.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            highlightSection(item.anchor.replace('#', ''));
+                        });
+                    }
+                    a.textContent = item.text;
+                    li.appendChild(a);
+                    nextUl.appendChild(li);
+                });
+                nextBox.appendChild(nextUl);
+                container.appendChild(nextBox);
+
+                // Edit YAML button
+                var editBtn = document.createElement('button');
+                editBtn.className = 'analyzer-edit-btn';
+                var editSvgNS = 'http://www.w3.org/2000/svg';
+                var editSvg = document.createElementNS(editSvgNS, 'svg');
+                editSvg.setAttribute('width', '16'); editSvg.setAttribute('height', '16');
+                editSvg.setAttribute('viewBox', '0 0 24 24'); editSvg.setAttribute('fill', 'none');
+                editSvg.setAttribute('stroke', 'currentColor'); editSvg.setAttribute('stroke-width', '2');
+                var editPath = document.createElementNS(editSvgNS, 'path');
+                editPath.setAttribute('d', 'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7');
+                var editPath2 = document.createElementNS(editSvgNS, 'path');
+                editPath2.setAttribute('d', 'M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z');
+                editSvg.appendChild(editPath); editSvg.appendChild(editPath2);
+                editBtn.appendChild(editSvg);
+                editBtn.appendChild(document.createTextNode('Edit YAML & Re-Analyze'));
+                editBtn.addEventListener('click', function() {
+                    var textarea = document.getElementById('yamlInput');
+                    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(function() { textarea.focus(); }, 400);
+                });
+                container.appendChild(editBtn);
+            }
+        }
+
+        function updateNavBadge(count) {
+            var navLink = document.querySelector('nav a[href="#analyzer"]');
+            if (!navLink) return;
+            var existing = navLink.querySelector('.nav-badge');
+            if (existing) navLink.removeChild(existing);
+            if (count > 0) {
+                var badge = document.createElement('span');
+                badge.className = 'nav-badge';
+                badge.textContent = String(count);
+                navLink.appendChild(badge);
             }
         }
 
         function clearAnalyzer() {
             document.getElementById('yamlInput').value = '';
             document.getElementById('analyzerResults').textContent = '';
+            showEmptyState();
+            updateInputStatus();
+            updateNavBadge(0);
         }
 
         function loadSampleYaml() {
@@ -2324,6 +3544,8 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
 '      more_set_headers "X-Custom-Header: value";\n' +
 '    nginx.ingress.kubernetes.io/server-tokens: "false"\n' +
 '    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"\n' +
+'    nginx.ingress.kubernetes.io/enable-access-log: "true"\n' +
+'    nginx.ingress.kubernetes.io/proxy-request-buffering: "on"\n' +
 'spec:\n' +
 '  ingressClassName: nginx\n' +
 '  tls:\n' +
@@ -2342,6 +3564,7 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
 '                port:\n' +
 '                  number: 443';
             document.getElementById('analyzerResults').textContent = '';
+            updateInputStatus();
         }
 
         function highlightSection(anchorId) {
@@ -2354,6 +3577,174 @@ kubectl apply -f https://raw.githubusercontent.com/nginx/kubernetes-ingress/v3.4
                 el.style.backgroundColor = '';
                 setTimeout(function() { el.style.transition = ''; }, 300);
             }, 2000);
+        }
+
+        function showEmptyState() {
+            var resultsDiv = document.getElementById('analyzerResults');
+            if (resultsDiv.children.length > 0) return;
+            var empty = document.createElement('div');
+            empty.className = 'analyzer-empty-state';
+            empty.id = 'analyzerEmptyState';
+            var svgNS = 'http://www.w3.org/2000/svg';
+            var svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('width', '48'); svg.setAttribute('height', '48');
+            svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', '#999'); svg.setAttribute('stroke-width', '1.5');
+            var path1 = document.createElementNS(svgNS, 'path');
+            path1.setAttribute('d', 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z');
+            var polyline = document.createElementNS(svgNS, 'polyline');
+            polyline.setAttribute('points', '14 2 14 8 20 8');
+            var line1 = document.createElementNS(svgNS, 'line');
+            line1.setAttribute('x1', '16'); line1.setAttribute('y1', '13');
+            line1.setAttribute('x2', '8'); line1.setAttribute('y2', '13');
+            var line2 = document.createElementNS(svgNS, 'line');
+            line2.setAttribute('x1', '16'); line2.setAttribute('y1', '17');
+            line2.setAttribute('x2', '8'); line2.setAttribute('y2', '17');
+            svg.appendChild(path1); svg.appendChild(polyline);
+            svg.appendChild(line1); svg.appendChild(line2);
+            empty.appendChild(svg);
+            var p1 = document.createElement('p');
+            p1.textContent = 'Paste your Ingress YAML above and click Analyze';
+            empty.appendChild(p1);
+            var p2 = document.createElement('p');
+            p2.className = 'hint';
+            p2.textContent = 'Drag & drop a .yaml file, or try "Load Sample" for an example';
+            empty.appendChild(p2);
+            resultsDiv.appendChild(empty);
+        }
+
+        // Drag-and-drop file upload
+        (function() {
+            var dropZone = document.getElementById('dropZone');
+            var textarea = document.getElementById('yamlInput');
+            var dragCounter = 0;
+            dropZone.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                dragCounter++;
+                dropZone.classList.add('dragging');
+            });
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                dragCounter--;
+                if (dragCounter <= 0) { dragCounter = 0; dropZone.classList.remove('dragging'); }
+            });
+            dropZone.addEventListener('dragover', function(e) { e.preventDefault(); });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dragCounter = 0;
+                dropZone.classList.remove('dragging');
+                var files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    var file = files[0];
+                    if (file.name.match(/\.(ya?ml|txt)$/i) || file.type === 'text/plain' || file.type === 'application/x-yaml') {
+                        var reader = new FileReader();
+                        reader.onload = function(ev) {
+                            textarea.value = ev.target.result;
+                            updateInputStatus();
+                            document.getElementById('analyzerResults').textContent = '';
+                        };
+                        reader.readAsText(file);
+                    }
+                }
+            });
+        })();
+
+        // Live input status
+        function updateInputStatus() {
+            var val = document.getElementById('yamlInput').value;
+            var lineCount = val ? val.split('\n').length : 0;
+            var annotationCount = (val.match(/nginx\.ingress\.kubernetes\.io\//g) || []).length;
+            document.getElementById('statusLines').textContent = lineCount + ' line' + (lineCount !== 1 ? 's' : '');
+            document.getElementById('statusDot').className = 'status-dot ' + (lineCount > 0 ? 'active' : 'inactive');
+            var annStatus = document.getElementById('statusAnnotations');
+            if (annotationCount > 0) {
+                annStatus.style.display = '';
+                document.getElementById('statusAnnotationCount').textContent = annotationCount + ' annotation' + (annotationCount !== 1 ? 's' : '') + ' detected';
+            } else {
+                annStatus.style.display = 'none';
+            }
+        }
+        document.getElementById('yamlInput').addEventListener('input', updateInputStatus);
+
+        // Keyboard shortcuts for textarea
+        document.getElementById('yamlInput').addEventListener('keydown', function(e) {
+            // Ctrl+Enter or Cmd+Enter to analyze
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                analyzeYaml();
+                return;
+            }
+            // Tab inserts 2 spaces
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                var start = this.selectionStart;
+                var end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 2;
+                updateInputStatus();
+            }
+        });
+
+        // Show empty state on page load
+        showEmptyState();
+
+        // Active nav highlighting on scroll
+        (function() {
+            var navLinks = document.querySelectorAll('nav a[href^="#"]');
+            var sections = [];
+            navLinks.forEach(function(link) {
+                var id = link.getAttribute('href').replace('#', '');
+                var section = document.getElementById(id);
+                if (section) sections.push({ el: section, link: link });
+            });
+            if (sections.length === 0) return;
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    var matchedLink = sections.find(function(s) { return s.el === entry.target; });
+                    if (matchedLink) {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(function(l) { l.classList.remove('active'); });
+                            matchedLink.link.classList.add('active');
+                        }
+                    }
+                });
+            }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+            sections.forEach(function(s) { observer.observe(s.el); });
+        })();
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            var isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark ? '1' : '0');
+            updateDarkToggle(isDark);
+        }
+        function updateDarkToggle(isDark) {
+            var label = document.getElementById('darkLabel');
+            var icon = document.getElementById('darkIcon');
+            while (icon.firstChild) icon.removeChild(icon.firstChild);
+            var svgNS = 'http://www.w3.org/2000/svg';
+            if (isDark) {
+                label.textContent = 'Light Mode';
+                var circle = document.createElementNS(svgNS, 'circle');
+                circle.setAttribute('cx', '12'); circle.setAttribute('cy', '12'); circle.setAttribute('r', '5');
+                icon.appendChild(circle);
+                [[12,1,12,3],[12,21,12,23],[4.22,4.22,5.64,5.64],[18.36,18.36,19.78,19.78],[1,12,3,12],[21,12,23,12],[4.22,19.78,5.64,18.36],[18.36,5.64,19.78,4.22]].forEach(function(l) {
+                    var ln = document.createElementNS(svgNS, 'line');
+                    ln.setAttribute('x1', l[0]); ln.setAttribute('y1', l[1]);
+                    ln.setAttribute('x2', l[2]); ln.setAttribute('y2', l[3]);
+                    icon.appendChild(ln);
+                });
+            } else {
+                label.textContent = 'Dark Mode';
+                var path = document.createElementNS(svgNS, 'path');
+                path.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+                icon.appendChild(path);
+            }
+        }
+        // Restore dark mode preference
+        if (localStorage.getItem('darkMode') === '1') {
+            document.body.classList.add('dark-mode');
+            updateDarkToggle(true);
         }
     </script>
 </body>
