@@ -40,6 +40,12 @@
             --text-secondary: #9ca3af;
             --border: #2a2d38;
             --shadow: 0 2px 12px rgba(0,0,0,0.3);
+            --green: #34d058;
+            --blue: #58a6ff;
+            --purple: #b07ee8;
+            --teal: #4dd0e1;
+            --red: #f48fb1;
+            --orange: #ffb74d;
         }
 
         /* ── Reset & Base ── */
@@ -97,9 +103,9 @@
         .sidebar-link .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
         .sidebar-link.active .dot { box-shadow: 0 0 0 3px var(--bg); }
         .sidebar-link[data-product="nginx-ingress-controller"] .dot { background: var(--green); }
-        .sidebar-link[data-product="nginx-gateway-fabric"] .dot { background: var(--blue); }
-        .sidebar-link[data-product="migration-tool"] .dot { background: var(--orange); }
-        .sidebar-link[data-product="ingress2gateway"] .dot { background: var(--purple); }
+        .sidebar-link[data-product="nginx-gateway-fabric"] .dot { background: var(--green); }
+        .sidebar-link[data-product="migration-tool"] .dot { background: var(--blue); }
+        .sidebar-link[data-product="ingress2gateway"] .dot { background: var(--blue); }
         .sidebar-link[data-product="blogs"] .dot { background: var(--teal); }
         .sidebar-link[data-product="videos"] .dot { background: var(--red); }
         .sidebar-link-text { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
@@ -121,32 +127,35 @@
         .product-page { display: none; }
         .product-page.active { display: block; }
 
-        .page-hero { padding: 48px 48px 40px; position: relative; overflow: hidden; }
-        .page-hero::before { content: ''; position: absolute; inset: 0; opacity: 0.06; background: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20h40M20 0v40' stroke='%23000' stroke-width='0.5'/%3E%3C/svg%3E"); }
+        .page-hero { padding: 48px 48px 64px; position: relative; overflow: hidden; }
+        .page-hero::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 50%; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; z-index: 1; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='43.3' height='75'%3E%3Cpath d='M0 12.5L21.65 0L43.3 12.5L43.3 37.5L21.65 50L0 37.5Z M21.65 50L21.65 75' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E"); }
         .page-hero.nic { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); }
-        .page-hero.ngf { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); }
-        .page-hero.migration { background: linear-gradient(135deg, #fff3e0, #fff8e1); }
-        .page-hero.i2g { background: linear-gradient(135deg, #f3e5f5, #ede7f6); }
+        .page-hero.ngf { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); }
+        .page-hero.migration { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); }
+        .page-hero.i2g { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); }
         .page-hero.blogs { background: linear-gradient(135deg, #e0f2f1, #e0f7fa); }
         .page-hero.videos { background: linear-gradient(135deg, #ffebee, #fce4ec); }
         body.dark-mode .page-hero.nic { background: linear-gradient(135deg, #0d1f10, #131f0d); }
-        body.dark-mode .page-hero.ngf { background: linear-gradient(135deg, #0a1929, #0d1540); }
-        body.dark-mode .page-hero.migration { background: linear-gradient(135deg, #1f1400, #1f1800); }
-        body.dark-mode .page-hero.i2g { background: linear-gradient(135deg, #1a0d24, #150a20); }
+        body.dark-mode .page-hero.ngf { background: linear-gradient(135deg, #0d1f10, #131f0d); }
+        body.dark-mode .page-hero.migration { background: linear-gradient(135deg, #0a1929, #0d1540); }
+        body.dark-mode .page-hero.i2g { background: linear-gradient(135deg, #0a1929, #0d1540); }
         body.dark-mode .page-hero.blogs { background: linear-gradient(135deg, #0a1a1b, #0a1c1e); }
         body.dark-mode .page-hero.videos { background: linear-gradient(135deg, #1f0a0a, #1e0a10); }
-        .page-hero-content { position: relative; max-width: 700px; }
+        body.dark-mode .page-hero::before { opacity: 0.08; }
+        .page-hero-content { position: relative; max-width: 700px; z-index: 2; }
         .page-hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 12px; }
         .page-hero-badge.nic { background: rgba(0,150,57,0.15); color: var(--green); }
-        .page-hero-badge.ngf { background: rgba(0,114,176,0.15); color: var(--blue); }
-        .page-hero-badge.migration { background: rgba(242,154,54,0.15); color: var(--orange); }
-        .page-hero-badge.i2g { background: rgba(98,34,139,0.15); color: var(--purple); }
+        .page-hero-badge.ngf { background: rgba(0,150,57,0.15); color: var(--green); }
+        .page-hero-badge.migration { background: rgba(0,114,176,0.15); color: var(--blue); }
+        .page-hero-badge.i2g { background: rgba(0,114,176,0.15); color: var(--blue); }
         .page-hero-badge.blogs { background: rgba(0,131,143,0.15); color: var(--teal); }
         .page-hero-badge.videos { background: rgba(198,40,40,0.15); color: var(--red); }
-        .hero-version { font-family: var(--mono); font-size: 0.72rem; padding: 1px 7px; border-radius: 8px; background: rgba(0,0,0,0.08); margin-left: 4px; }
+        .hero-version { display: inline-block; padding: 2px 7px; border-radius: 8px; font-size: 0.68rem; font-weight: 700; font-family: var(--mono); margin-left: 4px; color: inherit; text-decoration: none; background: rgba(0,0,0,0.08); transition: background 0.15s; }
+        .hero-version:hover { text-decoration: underline; }
         body.dark-mode .hero-version { background: rgba(255,255,255,0.1); }
         .page-hero h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
-        .page-hero p { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.6; }
+        .page-hero p { color: var(--text); font-size: 1.05rem; line-height: 1.6; }
 
         .page-body { padding: 40px 48px 60px; max-width: 1000px; }
 
@@ -186,12 +195,12 @@
         .cta-primary { color: #fff; }
         .cta-primary.nic { background: var(--green); }
         .cta-primary.nic:hover { background: var(--green-dark); }
-        .cta-primary.ngf { background: var(--blue); }
-        .cta-primary.ngf:hover { background: var(--blue-dark); }
-        .cta-primary.migration { background: var(--orange); }
-        .cta-primary.migration:hover { background: var(--orange-dark); }
-        .cta-primary.i2g { background: var(--purple); }
-        .cta-primary.i2g:hover { background: var(--purple-dark); }
+        .cta-primary.ngf { background: var(--green); }
+        .cta-primary.ngf:hover { background: var(--green-dark); }
+        .cta-primary.migration { background: var(--blue); }
+        .cta-primary.migration:hover { background: var(--blue-dark); }
+        .cta-primary.i2g { background: var(--blue); }
+        .cta-primary.i2g:hover { background: var(--blue-dark); }
         .cta-primary.blogs { background: var(--teal); }
         .cta-primary.blogs:hover { background: var(--teal-dark); }
         .cta-primary.videos { background: var(--red); }
@@ -206,6 +215,8 @@
         body.dark-mode .info-box.tip { background: #1b3a1f; color: #66bb6a; }
         .info-box.info { background: #e3f2fd; border-left: 4px solid var(--blue); color: #1565c0; }
         body.dark-mode .info-box.info { background: #0d2137; color: #64b5f6; }
+        .info-box.tip-green { background: #e8f5e9; border-left: 4px solid var(--green); color: #2e7d32; }
+        body.dark-mode .info-box.tip-green { background: #1b3a1f; color: #66bb6a; }
         .info-box.warning { background: #fff3e0; border-left: 4px solid var(--orange); color: #bf4000; }
         body.dark-mode .info-box.warning { background: #2a1a00; color: #ffb74d; }
 
@@ -224,8 +235,8 @@
         .version-pill a { color: inherit; text-decoration: none; }
         .version-pill a:hover { text-decoration: underline; }
         .version-pill.nic { background: rgba(0,150,57,0.12); color: var(--green); }
-        .version-pill.ngf { background: rgba(0,114,176,0.12); color: var(--blue); }
-        .version-pill.i2g { background: rgba(98,34,139,0.12); color: var(--purple); }
+        .version-pill.ngf { background: rgba(0,150,57,0.12); color: var(--green); }
+        .version-pill.i2g { background: rgba(0,114,176,0.12); color: var(--blue); }
 
         /* ── Compatibility Table ── */
         .compat-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
@@ -245,7 +256,7 @@
         .preview-stats { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
         .preview-stat { text-align: center; }
         .preview-stat .num { font-size: 1.6rem; font-weight: 800; display: block; }
-        .preview-stat .num.migration { color: var(--orange); }
+        .preview-stat .num.migration { color: var(--blue); }
         .preview-stat .label { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
 
         /* ── Resource List (Blogs/Videos) ── */
@@ -406,9 +417,9 @@
                 <div class="page-hero nic">
                     <div class="page-hero-content">
                         <span class="page-hero-badge nic">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <svg width="16" height="16" viewBox="34 5 36 48" fill="none"><path fill="#009639" d="M35.31,40.15c.21.37.52.66.86.86l17.65,10.19c.34.2.75.32,1.17.32s.83-.12,1.17-.32l17.65-10.19c.35-.2.65-.48.86-.86.21-.37.31-.78.31-1.18v-20.38c0-.4-.1-.81-.31-1.18-.21-.37-.52-.66-.86-.86l-17.65-10.19c-.34-.2-.74-.32-1.17-.32s-.83.12-1.17.32l-17.65,10.19c-.35.2-.65.49-.86.86-.21.37-.31.78-.31,1.18v20.38c0,.4.1.8.31,1.18"/><path fill="#fff" d="M56.79,36.68h-13.66c-.37,0-.67-.3-.67-.67v-13.66c0-.37.3-.67.67-.67h13.66c.37,0,.67.3.67.67v13.66c0,.37-.3.67-.67.67Z"/><path fill="#fff" d="M67,22.69h-4.08c-.25,0-.46-.21-.46-.46v-4.08c0-.25.21-.46.46-.46h4.08c.25,0,.46.21.46.46v4.08c0,.25-.21.46-.46.46Z"/><path fill="#fff" d="M67,31.68h-4.08c-.25,0-.46-.21-.46-.46v-4.08c0-.25.21-.46.46-.46h4.08c.25,0,.46.21.46.46v4.08c0,.25-.21.46-.46.46Z"/><path fill="#fff" d="M67.08,39.88h-4.08c-.25,0-.46-.21-.46-.46v-4.08c0-.25.21-.46.46-.46h4.08c.25,0,.46.21.46.46v4.08c0,.25-.21.46-.46.46Z"/><polygon fill="#fff" points="64.95 29.68 48.15 29.66 64.7 19.76 65.21 20.62 51.76 28.67 64.96 28.68 64.95 29.68"/><rect fill="#fff" x="57" y="24.68" width="1" height="17.18" transform="translate(.78 67.86) rotate(-61.43)"/></svg>
                             Ingress Controller
-                            <span class="hero-version" data-version="nic.release">v5.3.4</span>
+                            <a class="hero-version" data-version="nic.release" href="https://github.com/nginx/kubernetes-ingress/releases/tag/v5.3.4" target="_blank" rel="noopener">v5.3.4</a>
                         </span>
                         <h1>NGINX Ingress Controller</h1>
                         <p>Production-grade Ingress controller built on NGINX. Advanced traffic management, TLS termination, VirtualServer CRDs, and full observability for Kubernetes.</p>
@@ -526,42 +537,42 @@
                 <div class="page-hero ngf">
                     <div class="page-hero-content">
                         <span class="page-hero-badge ngf">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
+                            <svg width="16" height="16" viewBox="34 5 36 48" fill="none"><path fill="#009639" d="M35.31,39.58c.21.37.52.66.86.86l17.65,10.19c.34.2.75.32,1.17.32s.83-.12,1.17-.32l17.65-10.19c.35-.2.65-.48.86-.86.21-.37.31-.78.31-1.18v-20.38c0-.4-.1-.81-.31-1.18-.21-.37-.52-.66-.86-.86l-17.65-10.19c-.34-.2-.74-.32-1.17-.32s-.83.12-1.17.32l-17.65,10.19c-.35.2-.65.49-.86.86-.21.37-.31.78-.31,1.18v20.38c0,.4.1.8.31,1.18"/><polygon fill="#fff" points="54.87 41.41 43.25 34.46 54.88 27.97 55.37 28.84 45.25 34.49 55.38 40.55 54.87 41.41"/><path fill="#fff" d="M66.51,35.33l-11.38-6.35-.51.3v-12.98l-10.38,6.06-.5-.86,11.89-6.94v12.96l10.88-6.47v14.27ZM56.13,28.39l9.38,5.23v-10.81l-9.38,5.58Z"/><circle fill="#fff" cx="43.99" cy="21.94" r="3"/><circle fill="#fff" cx="66.01" cy="21.94" r="3"/><circle fill="#fff" cx="55.13" cy="15.44" r="3"/><circle fill="#fff" cx="55.13" cy="28.41" r="3"/><circle fill="#fff" cx="44.25" cy="34.48" r="3"/><circle fill="#fff" cx="55.13" cy="40.98" r="3"/><circle fill="#fff" cx="66.01" cy="34.48" r="3"/></svg>
                             Gateway Fabric
-                            <span class="hero-version" data-version="ngf.release">v2.4.2</span>
+                            <a class="hero-version" data-version="ngf.release" href="https://github.com/nginx/nginx-gateway-fabric/releases/tag/v2.4.2" target="_blank" rel="noopener">v2.4.2</a>
                         </span>
                         <h1>NGINX Gateway Fabric</h1>
                         <p>Gateway API implementation powered by NGINX. A future-ready, standards-based approach to Kubernetes traffic management with control and data plane separation.</p>
                     </div>
                 </div>
                 <div class="page-body">
-                    <div class="info-box info">
+                    <div class="info-box tip-green">
                         <strong>Gateway API</strong> is the next generation of Kubernetes Ingress &mdash; providing more expressive, extensible, and role-oriented routing for services. NGINX Gateway Fabric is a fully conformant implementation.
                     </div>
 
                     <div class="feature-grid">
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> Gateway API Native</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> Gateway API Native</h4>
                             <p>First-class Kubernetes Gateway API v1.4.1 implementation with full conformance testing across HTTP, GRPC, TLS, TCP, and UDP.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg> Control &amp; Data Plane Separation</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg> Control &amp; Data Plane Separation</h4>
                             <p>Clean architectural split with NGINX Agent dynamically managing the NGINX data plane for reliability and scale.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Multi-Cloud Ready</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Multi-Cloud Ready</h4>
                             <p>Deploy consistently across hybrid and multi-cloud Kubernetes environments with portable Gateway API resources.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> TLS &amp; mTLS</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> TLS &amp; mTLS</h4>
                             <p>Flexible TLS termination and passthrough with automatic certificate management and mutual TLS support.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 012 2v7"/><path d="M6 9v12"/></svg> Traffic Splitting</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 012 2v7"/><path d="M6 9v12"/></svg> Traffic Splitting</h4>
                             <p>Weighted backend routing for canary deployments and A/B testing using native HTTPRoute resources.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Extensibility</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Extensibility</h4>
                             <p>SnippetsFilter, ClientSettingsPolicy, and ObservabilityPolicy custom resources for use cases beyond core Gateway API.</p>
                         </div>
                     </div>
@@ -627,7 +638,7 @@
 <span class="cmd">helm</span> install nginx-gateway-fabric \
   oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
   <span class="flag">--version</span> <span class="str" data-version="ngf.helm" data-version-format="bare">2.4.2</span> \
-  <span class="flag">-n</span> nginx-gateway-fabric <span class="flag">--create-namespace</span></code></div>
+  <span class="flag">--namespace</span> nginx-gateway-fabric <span class="flag">--create-namespace</span></code></div>
                     </div>
 
                     <div class="cta-row">
@@ -668,27 +679,27 @@
                 <div class="page-body">
                     <div class="feature-grid">
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg> Interactive YAML Analyzer</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8m8 4H8m2-8H8"/></svg> Interactive YAML Analyzer</h4>
                             <p>Paste your existing Ingress YAML and get an instant migration plan with converted annotations, ConfigMap mappings, and CRD suggestions.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 130+ Annotation Mappings</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 130+ Annotation Mappings</h4>
                             <p>Complete mapping table with community annotations, their Official equivalents, side-by-side YAML examples, and searchable filters.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> CRD Migration Examples</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> CRD Migration Examples</h4>
                             <p>Side-by-side examples for VirtualServer, VirtualServerRoute, Policy, TransportServer, and GlobalConfiguration CRDs.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> ConfigMap Migration</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> ConfigMap Migration</h4>
                             <p>Detailed guide for migrating ConfigMap-based global configuration between the community and Official controllers.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Complexity Assessment</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Complexity Assessment</h4>
                             <p>The analyzer evaluates your Ingress resources and provides a migration complexity score with actionable recommendations.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Copy-Ready Output</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Copy-Ready Output</h4>
                             <p>Every code block and generated YAML snippet includes a one-click copy button for immediate use in your workflow.</p>
                         </div>
                     </div>
@@ -733,7 +744,7 @@
                         <span class="page-hero-badge i2g">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
                             Conversion Tool
-                            <span class="hero-version" data-version="i2g.release">v0.5.0</span>
+                            <a class="hero-version" data-version="i2g.release" href="https://github.com/nginx/ingress2gateway/releases/tag/v0.5.0" target="_blank" rel="noopener">v0.5.0</a>
                         </span>
                         <h1>ingress2gateway</h1>
                         <p>Convert Ingress resources to Gateway API resources using the official NGINX provider. Automate your migration from Ingress to the Kubernetes Gateway API.</p>
@@ -742,28 +753,28 @@
                 <div class="page-body">
                     <div class="feature-grid">
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg> Automated Conversion</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg> Automated Conversion</h4>
                             <p>Reads Ingress resources from your cluster or YAML files and outputs equivalent Gateway API manifests automatically.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> NGINX Provider</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> NGINX Provider</h4>
                             <p>Dedicated NGINX provider that understands 14 NGINX-specific annotations and converts them to their Gateway API equivalents.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> Gateway &amp; HTTPRoute Output</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> Gateway &amp; HTTPRoute Output</h4>
                             <p>Produces Gateway and HTTPRoute resources ready for direct application to your cluster.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> CLI Tool</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> CLI Tool</h4>
                             <p>Simple command-line interface that fits into CI/CD pipelines. Read from files or directly from a live cluster.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 8 Providers</h4>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> 8 Providers</h4>
                             <p>Support for NGINX, Istio, Kong, Apisix, GCE, OpenAPI3, and more &mdash; each with provider-specific annotation handling.</p>
                         </div>
                         <div class="feature-card">
-                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> File or Cluster Input</h4>
-                            <p>Read Ingress resources from local YAML files with <code style="background:rgba(98,34,139,0.1);color:var(--purple)">--input-file</code> or directly from a connected Kubernetes cluster.</p>
+                            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> File or Cluster Input</h4>
+                            <p>Read Ingress resources from local YAML files with <code style="background:rgba(0,114,176,0.1);color:var(--blue)">--input-file</code> or directly from a connected Kubernetes cluster.</p>
                         </div>
                     </div>
 
@@ -859,12 +870,16 @@
                 if (data[product] && data[product][field]) {
                     var ver = data[product][field];
                     var fmt = el.getAttribute('data-version-format');
+                    var vTag = ver.charAt(0) === 'v' ? ver : 'v' + ver;
                     if (fmt === 'bare') {
                         el.textContent = ver.replace(/^v/, '');
                     } else if (fmt === 'atv') {
-                        el.textContent = '@' + (ver.charAt(0) === 'v' ? ver : 'v' + ver);
+                        el.textContent = '@' + vTag;
                     } else {
-                        el.textContent = ver.charAt(0) === 'v' ? ver : 'v' + ver;
+                        el.textContent = vTag;
+                    }
+                    if (el.tagName === 'A' && field === 'release' && VERSION_CONFIG[product]) {
+                        el.href = 'https://github.com/' + VERSION_CONFIG[product].repo + '/releases/tag/' + vTag;
                     }
                 }
             }
